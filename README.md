@@ -13,10 +13,19 @@ folder3/
 42:data42.fcs
 48:data48.fcs
 ```
-The name of the file my be someting like `file.dat`.
+The name of the file my be someting like `fileCTV-PKH.dat`, ehere `CTV` and `PKH` are the names of the fluorescence channel.
 
 At the first execution we will run the program with the preprocessing flag:
 ```
-python runFcMGM.py --preprocessing --dim 3 -i file.dat
+python runFcMGM.py --preprocessing --dim 2 -i CTV-PKH
 ```
 The flag `-dim` set the number of dimation which can be 1 to 3.
+Then to set the inital values of the mixture of Gaussians model we run:
+```
+python runFcMGM.py --setInit --dim 2 -i MITO-CTV
+```
+Finaly, to run the EM mixture of Gaussians model we run:
+```
+python runFcMGM.py --dim 2 -i MITO-CTV
+```
+
