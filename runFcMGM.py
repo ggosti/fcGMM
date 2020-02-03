@@ -7,7 +7,7 @@ import numpy as np
 
 #from matplotlib.colors import LogNorm
 #from skimage.morphology import square
-import myMGM as mgm
+import fcMGM as mgm
 #from pandas.plotting import scatter_matrix
 #import scipy.stats as st
 #from skimage.morphology import square
@@ -25,7 +25,7 @@ def parse_arguments():
     parser.add_argument('--preprocessing', action='store_true', default=False)
     parser.add_argument('--setInit', action='store_true', default=False)
     parser.add_argument('--dim', action='store', default=2)
-    parser.add_argument('-i', action='store', type = str, default='dataPKH-CTV.dat', help='file with fcs file paths')
+    parser.add_argument('-i', action='store', type = str, default='PKH-CTV', help='file with fcs file paths')
     #parser.add_argument('--gaussianDetection', action='store_true', default=False)
     parser.add_argument("--times",  nargs="*",  # 0 or more values expected => creates a list
                             type=int, default=[-1,-2,-3],  # default if nothing is provided
@@ -52,16 +52,26 @@ if __name__=="__main__":
         os.makedirs(dirPlots)
 
     datafile = {}
-    sufx = args.i.split('.')[0]
+    sufx = 'data'+args.i#args.i.split('.')[0]
     print('sufx', sufx)
 
     print('i',args.i)
     ylab = None
-    if args.i == 'dataPKH-CTV.dat': ylab = 'PE-A'
-    if args.i == 'dataMITO-CTV.dat': ylab = 'FITC-A'
+    if ('PKH' in args.i) and (not 'MITO' in args.i):#args.i == 'dataPKH-CTV.dat':
+        ylab = 'PE-A'
+        zlab = None
+    if (not 'PKH' in args.i) and ('MITO' in args.i):#args.i == 'dataMITO-CTV.dat':
+        ylab = 'FITC-A'
+        zlab = None
+    if ('PKH' in args.i) and ('MITO' in args.i): #args.i == 'dataPKH-CTV-MITO.dat':
+        ylab = 'PE-A'
+        zlab = 'FITC-A'
+    print('xlab','CTV')
+    print('ylab',ylab)
+    print('zlab',zlab)
 
     datadir = ''
-    with open(args.i) as f:
+    with open(sufx+'.dat') as f:
         for line in f:
             line = line[:-1]
             print(line)
@@ -120,14 +130,14 @@ if __name__=="__main__":
                 df,x,y,z = mgm.noDropOutliers(df,lx,ly,lz)
                 print('df shape',df.shape)
                 mgm.plot3dloglog(x,y,z,namestr,llim=1,xlabel=lx,ylabel=ly,zlabel=lz,dfAuto=dfAuto)
-                plt.savefig(dirPlots+'3dplot'+str(name)+'h'+sufx+'-cor.png')
+                plt.savefig(dirPlots+'3dplot'+str(name)+'h-cor.png')
         plt.show()
     else:
         aqName = mgm.getAq(datafile)
-        dataPars = mgm.readPreProcPars(aqName,sufx)#,path=dirClean)
+        dataPars = mgm.readPreProcPars(aqName)#,path=dirClean)
         dataframe = {}
         for k in aqName:
-            df = pd.read_pickle(dirClean+'cleaned'+str(k)+'h'+sufx+'.pkl')
+            df = pd.read_pickle(dirClean+'cleaned'+str(k)+'h.pkl')
             dataframe[k] = df
 
 
@@ -156,7 +166,7 @@ if __name__=="__main__":
                 if os.path.isfile(initFN):
                     res0 = pd.read_csv(initFN)
                     m = np.sum(['mean' in r for r in res0.columns])
-                    means , Cs = mgm.getMeanCsFromRes(res0,m,dim,ylabel=ylab,zlabel=None)
+                    means , Cs = mgm.getMeanCsFromRes(res0,m,dim,ylabel=ylab,zlabel=zlab)
                     print(means , Cs)
                 else:               
                     means = []
@@ -260,7 +270,7 @@ if __name__=="__main__":
                 for s in sigs:
                     C = np.diagflat(s)
                     Cs.append(C)
-                mgm.writeGaussians(hour,dim,m,means,Cs,dirInit+'init',sufx,ylabel=ylab,zlabel=None)
+                mgm.writeGaussians(hour,dim,m,means,Cs,dirInit+'init',sufx,ylabel=ylab,zlabel=zlab)
 
 
     print('-------------------run mixture of gaussian-------------------------')
@@ -271,6 +281,7 @@ if __name__=="__main__":
     else:
         names = args.times
         names.sort()
+    print('file names',names)
 
     for name in names:
         if isinstance(name, int):
@@ -280,16 +291,16 @@ if __name__=="__main__":
             dim = int(args.dim)
             print('dim',dim)
 
-            res0 = pd.read_csv(dirInit+'init-dim'+str(dim)+'-'+str(hour)+'h'+sufx+'.csv')
+            res0 = pd.read_csv(dirInit+'init-dim'+str(dim)+'-'+str(hour)+'h-'+sufx+'.csv')
             m = np.sum(['mean' in r for r in res0.columns])
-            means,Cs,ws = mgm.runGM(hour,dim,m,data,res0,sufx,outf=True,show=True,cond=False,ylabel=ylab,zlabel=None)
+            means,Cs,ws = mgm.runGM(hour,dim,m,data,res0,sufx,outf=True,show=True,cond=False,ylabel=ylab,zlabel=zlab)
             plt.show()
-            if dim > 1:
-                means_chunck,vars_chunck = mgm.resample(data,dim,m,hour,res0,means,Cs,sufx,chunkNum = 10,ylabel=ylab,zlabel=None)
-                mgm.writeGaussians(hour,dim,m,means,Cs,dirRes+'results',sufx,means_chunck,vars_chunck,ylabel=ylab,zlabel=None)
-                plt.show()
-            else:
-                mgm.writeGaussians(hour, dim, m, means, Cs, dirRes+'results', sufx, ylabel=ylab, zlabel=None)
+            #if dim > 1:
+            #    means_chunck,vars_chunck = mgm.resample(data,dim,m,hour,res0,means,Cs,sufx,chunkNum = 10,ylabel=ylab,zlabel=None)
+            #    mgm.writeGaussians(hour,dim,m,means,Cs,dirRes+'results',sufx,means_chunck,vars_chunck,ylabel=ylab,zlabel=None)
+            #    plt.show()
+            #else:
+            #    mgm.writeGaussians(hour, dim, m, means, Cs, dirRes+'results', sufx, ylabel=ylab, zlabel=None)
             for k in range(m):
                 data.loc[:,'w'+str(k)] = ws[k]
             data.to_pickle(dirRes+'weighted'+str(name)+'h'+sufx+'.pkl')

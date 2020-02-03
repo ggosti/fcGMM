@@ -1,6 +1,6 @@
 # fcMGM
 
-The program reqiores the existence of a file descirbing were the citoflorimeter outpufiles are placed.
+The program reqiores the existence of a file descirbing were the cytofluorometer outpufiles are placed. 
 
 ```
 folder1/
@@ -13,3 +13,10 @@ folder3/
 42:data42.fcs
 48:data48.fcs
 ```
+The name of the file my be someting like `file.dat`.
+
+At the first execution we will run the program with the preprocessing flag:
+```
+python runFcMGM.py --preprocessing --dim 3 -i file.dat
+```
+The flag `-dim` set the number of dimation which can be 1 to 3.

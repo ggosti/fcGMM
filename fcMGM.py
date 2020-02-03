@@ -1021,13 +1021,13 @@ def getAq(datafile):
     aqName = [n for n in datafile.keys() if  isinstance(n, int)]
     aqStrName = [n for n in datafile.keys() if not isinstance(n, int)]
     aqName.sort()
-    print(aqName)
+    #print(aqName)
     names = aqStrName + aqName
     return names
 
-def readPreProcPars(aqName,sufx):
+def readPreProcPars(aqName):
     dataPars = {}
-    fname = 'preproc-pars'+sufx+'.csv'
+    fname = 'preproc-pars.csv'
     if os.path.isfile(fname):
         with open(fname) as csvfile:
             reader = csv.DictReader(csvfile)
@@ -1063,7 +1063,7 @@ def readPreProcPars(aqName,sufx):
 def doPreproc(datafile,sufx,aqName2,path):
     dataframe = {}
     aqName = getAq(datafile)
-    dataPars = readPreProcPars(aqName,sufx)
+    dataPars = readPreProcPars(aqName)
 
     for k in aqName2:
         f = datafile[k]
@@ -1153,13 +1153,17 @@ def doPreproc(datafile,sufx,aqName2,path):
         
         gateTh = valK<th
         graph,dfTh = prepData(x,y,z,ssca,fsca,gateTh,gate1,gate2,str(k)+' h')
+        dataPars[k]['preprocessing drop rate'] = float(len(dfTh))/float(len(data))
+        dataPars[k]['th'] = th
+        dataPars[k]['ssca hf'] = sthssca.val
+        dataPars[k]['fsca hf'] = sthfsca.val
         print('drop rate ',float(len(dfTh))/float(len(data)),' original sample size ',len(data), ' th. sample size ',len(dfTh))
             
         plt.show()
         
-        fig.savefig(path+'SSCAFSCAPlot-'+str(k)+'h'+sufx+'.pdf')
-        graph.savefig(path+'Plot-'+str(k)+'h'+sufx+'.pdf')
-        dfTh.to_pickle(path+'cleaned'+str(k)+'h'+sufx+'.pkl')
+        fig.savefig(path+'SSCAFSCAPlot-'+str(k)+'h.pdf')
+        graph.savefig(path+'Plot-'+str(k)+'h.pdf')
+        dfTh.to_pickle(path+'cleaned'+str(k)+'h.pkl')
 
         dataframe[k] = dfTh
                
@@ -1168,7 +1172,7 @@ def doPreproc(datafile,sufx,aqName2,path):
     for a in aqName:
         print(dataPars[a])
 
-    with open('preproc-pars'+sufx+'.csv', 'w') as f:  # Just use 'w' mode in 3.x
+    with open('preproc-pars.csv', 'w') as f:  # Just use 'w' mode in 3.x
         w = csv.DictWriter(f, dataPars[a].keys())
         w.writeheader()
         for a in aqName:
@@ -1200,7 +1204,7 @@ def writeGaussians(hour,dim,m,means,Cs,suffix,sufx,means_chunck=[],vars_chunck=[
                 results.loc[1,'std Cs '+ylabel+' '+str(k)] =  np.std(vars_chunck[k,1])
             if dim > 2: results.loc[2,'std Cs '+zlabel+' '+str(k)] =  np.std(vars_chunck[k,2])
 
-    results.to_csv(suffix+'-dim'+str(dim)+'-'+str(hour)+'h'+sufx+'.csv')
+    results.to_csv(suffix+'-dim'+str(dim)+'-'+str(hour)+'h-'+sufx+'.csv')
 
 def resample(data,dim,m,hour,res0,means,Cs,sufx,chunkNum = 10,xlabel='V450-A',ylabel='PE-A',zlabel='FITC-A'):
     dimMap = {0:xlabel,1:ylabel}
