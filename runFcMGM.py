@@ -84,7 +84,9 @@ if __name__=="__main__":
                 except:
                     datafile[line.split(':')[0]] = datadir+line.split(':')[-1]
             else:
-                print('line error',line)
+                print('line error', datadir+line.split(':')[-1])
+                print('file does not exist',os.path.isfile(datadir+line.split(':')[-1]))
+                print('dir does not exist',os.path.isdir(dirEx+line) )
     
     # names = []
     # #print('get names')
@@ -162,51 +164,60 @@ if __name__=="__main__":
                 xy = np.vstack([x,y])
                 valK = kernel(xy)
                 print('hour ',hour,' dim ',dim)
-                initFN = dirInit + 'init-dim'+str(dim)+'-'+str(hour)+'h'+sufx+'.csv'
+                initFN = dirInit + 'init-dim'+str(dim)+'-'+str(hour)+'h-'+sufx+'.csv'
+                print(initFN)
                 if os.path.isfile(initFN):
                     res0 = pd.read_csv(initFN)
                     m = np.sum(['mean' in r for r in res0.columns])
                     means , Cs = mgm.getMeanCsFromRes(res0,m,dim,ylabel=ylab,zlabel=zlab)
                     print(means , Cs)
+                    sig = 0.04
                 else:               
                     means = []
                     sig = 0.04
-                    fig, ax = plt.subplots()
-                    plt.subplots_adjust(left=0.25, bottom=0.30)  
-                    ax.scatter(x,y,1,c = valK)
-                    ax.set_xlabel('V450-A')
-                    ax.set_ylabel(ylab)
-                    Cs = None
-                    #mgm.regenax(x,y,valK,m,mean,sig,ax)
-                    #m = input("Enter number of Goussians: ") 
-                    #plt.show()
+                    Cs = []
 
-                    def onclick(event):
-                        global means
-                        ix, iy = event.xdata, event.ydata
-                        print('x = %d, y = %d'%(ix, iy) )
-                        means.append(np.array([ix, iy]))
-                        mgm.regenax(x,y,valK,means,sig,ax)
-                        fig.canvas.draw_idle()
-                        #fig.canvas.mpl_disconnect(cid)
-                        #if len(means) == m:
-                        #    fig.canvas.mpl_disconnect(cid)
-                    cid = fig.canvas.mpl_connect('button_press_event', onclick)
-                    plt.show()
-                    print(means)
-                    m = len(means)
+                fig, ax = plt.subplots()
+                plt.subplots_adjust(left=0.25, bottom=0.30)  
+                ax.scatter(x,y,1,c = valK)
+                ax.set_xlabel('V450-A')
+                ax.set_ylabel(ylab)
+                #print('means',means)
+                #for i,m,c in zip(range(len(means)),means,Cs):
+                    # lam,v = mgm.drawCovEllipse(m,c,ax,i)
+                mgm.regenax(x,y,valK,means,Cs,ax)
+                #mgm.regenax(x,y,valK,m,mean,sig,ax)
+                #m = input("Enter number of Goussians: ") 
+                #plt.show()
+
+                def onclick(event):
+                    global means
+                    ix, iy = event.xdata, event.ydata
+                    print('x = %d, y = %d'%(ix, iy) )
+                    means.append(np.array([ix, iy]))
+                    Cs.append(np.array([[sig, 0],[0,sig]]))
+                    mgm.regenax(x,y,valK,means,Cs,ax)
+                    fig.canvas.draw_idle()
+                    #fig.canvas.mpl_disconnect(cid)
+                    #if len(means) == m:
+                    #    fig.canvas.mpl_disconnect(cid)
+                cid = fig.canvas.mpl_connect('button_press_event', onclick)
+                plt.show()
+                print(means)
+                m = len(means)
+
                 fig, ax = plt.subplots()
                 plt.subplots_adjust(left=0.25, bottom=0.30)
                 ax.set_xlabel('V450-A')
                 ax.set_ylabel(ylab)
-                sigs = []
-                if Cs == None:            
-                    for i in range(m):
-                        sigs.append([sig,sig])
-                else:
-                    for C in Cs:
-                        sigs.append([C[0,0],C[1,1]])
-                mgm.regenax(x,y,valK,means,sigs,ax)
+                #sigs = []
+                #if Cs == None:            
+                #    for i in range(m):
+                #        sigs.append(np.array([[sigx,0],[0,sigy]]))
+                #else:
+                #for C in Cs:
+                #    sigs.append(C)
+                mgm.regenax(x,y,valK,means,Cs,ax)
 
                 gauss = 0
                 axM = plt.axes([0.25, 0.25, 0.65, 0.03])#, facecolor=axcolor)
@@ -215,8 +226,8 @@ if __name__=="__main__":
                 axSig2 = plt.axes([0.25, 0.10, 0.65, 0.03])#, facecolor=axcolor)
                 sMx = Slider(axM, 'mean x: ', 6., 18., valinit=means[0][0])
                 sMy = Slider(axM2, 'mean y: ', 6., 18., valinit=means[0][1])
-                sSigx = Slider(axSig, 'sigma x: ', 0.01, 0.6, valinit=sigs[0][0])
-                sSigy = Slider(axSig2, 'sigma y: ', 0.01, 0.6, valinit=sigs[0][1])
+                sSigx = Slider(axSig, 'sigma x: ', 0.01, 0.6, valinit=Cs[0][0,0])
+                sSigy = Slider(axSig2, 'sigma y: ', 0.01, 0.6, valinit=Cs[0][1,1])
 
                 raxM = plt.axes([0.025, 0.5, 0.15, 0.15])
                 rbs = []
@@ -233,9 +244,9 @@ if __name__=="__main__":
                     means[gauss] = [mx,my]
                     sigx = sSigx.val
                     sigy = sSigy.val
-                    sigs[gauss] = [sigx,sigy]
-                    print('sigs',sigs)
-                    mgm.regenax(x,y,valK,means,sigs,ax)
+                    Cs[gauss] = np.array([[sigx,0],[0,sigy]])
+                    print('Cs',Cs)
+                    mgm.regenax(x,y,valK,means,Cs,ax)
                     fig.canvas.draw_idle()
                 #sM.on_changed(update)
                 sMx.on_changed(update)
@@ -248,8 +259,8 @@ if __name__=="__main__":
                     gauss = int(label[-1]) -1
                     mx = means[gauss][0]
                     my = means[gauss][1]
-                    sigx = sigs[gauss][0]
-                    sigy = sigs[gauss][1]
+                    sigx = Cs[gauss][0]
+                    sigy = Cs[gauss][1]
                     #axSig.clear()
                     #axSig2.clear()
                     #sSigx = Slider(axSig, 'sigma x: ', 0.01, 0.2, valinit=sigx)
@@ -266,10 +277,10 @@ if __name__=="__main__":
                 
                 plt.show()
 
-                Cs = []
-                for s in sigs:
-                    C = np.diagflat(s)
-                    Cs.append(C)
+                #Cs = []
+                #for s in sigs:
+                #    C = np.diagflat(s)
+                #    Cs.append(C)
                 mgm.writeGaussians(hour,dim,m,means,Cs,dirInit+'init',sufx,ylabel=ylab,zlabel=zlab)
 
 

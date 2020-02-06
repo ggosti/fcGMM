@@ -500,9 +500,9 @@ def regenax(x,y,valK,means,sig,ax):
             lam,v = drawCovEllipse(me,C,ax,i) 
     else:
         for i,me,s in zip(range(len(means)),means,sig):
-            print(me,s)
-            C = np.diagflat(s)
-            lam,v = drawCovEllipse(me,C,ax,i) 
+            print('mean',me,'Cs',s)
+            #C = np.diagflat(s)
+            lam,v = drawCovEllipse(me,s,ax,i) 
 
 def plot3dloglog(x,y,z,time,llim=8,lim = 18,xlabel='x',ylabel='y',zlabel='z',nbins = 100.0,Hthr=0.0,dfAuto=None):
     fig = plt.figure(figsize=(12, 12))
