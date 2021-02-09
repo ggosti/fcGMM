@@ -1,6 +1,6 @@
 # fcMGM
 
-The program reqiores the existence of a file descirbing were the cytofluorometer outpufiles are placed. 
+The program requires the existence of a file descirbing were the cytofluorometer outpufiles are placed. 
 
 ```
 folder1/
