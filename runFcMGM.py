@@ -118,7 +118,7 @@ if __name__=="__main__":
         ly = 'log PE-A'
         lz ='log FITC-A'
 
-        temp,x,y,z = mgm.noDropOutliers(dfAuto,lx,ly,lz)
+        temp,x,y,z = mgm.getCols(dfAuto,lx,ly,lz)
         mgm.plot3dloglog(x,y,z,name,llim=1,xlabel=lx,ylabel=ly,zlabel=lz,dfAuto=dfAuto)
         plt.savefig(dirPlots+'3dplot'+name+'h'+sufx+'.png')
 
@@ -130,7 +130,7 @@ if __name__=="__main__":
                 namestr = str(name)+' h '
                 print(namestr)
                 print('df shape',df.shape)
-                df,x,y,z = mgm.noDropOutliers(df,lx,ly,lz)
+                df,x,y,z = mgm.getCols(df,lx,ly,lz)
                 print('df shape',df.shape)
                 mgm.plot3dloglog(x,y,z,namestr,llim=1,xlabel=lx,ylabel=ly,zlabel=lz,dfAuto=dfAuto)
                 plt.savefig(dirPlots+'3dplot'+str(name)+'h-cor.png')
@@ -295,7 +295,6 @@ if __name__=="__main__":
 
     for name in names:
         if isinstance(name, int):
-            from matplotlib.widgets import Slider, Button, RadioButtons
             data = dataframe[name]
             hour = name
             dim = int(args.dim)
@@ -303,14 +302,9 @@ if __name__=="__main__":
 
             res0 = pd.read_csv(dirInit+'init-dim'+str(dim)+'-'+str(hour)+'h-'+sufx+'.csv')
             m = np.sum(['mean' in r for r in res0.columns])
-            means,Cs,ws = mgm.runGM(hour,dim,m,data,res0,sufx,outf=True,show=True,cond=False,ylabel=ylab,zlabel=zlab)
+            means,Cs,ws = mgm.runGM(hour,dim,m,data,res0,sufx,outf=True,show=False,cond=False,
+            							xlabel=xlab,ylabel=ylab,zlabel=zlab)
             plt.show()
-            #if dim > 1:
-            #    means_chunck,vars_chunck = mgm.resample(data,dim,m,hour,res0,means,Cs,sufx,chunkNum = 10,ylabel=ylab,zlabel=None)
-            #    mgm.writeGaussians(hour,dim,m,means,Cs,dirRes+'results',sufx,means_chunck,vars_chunck,ylabel=ylab,zlabel=None)
-            #    plt.show()
-            #else:
-            #    mgm.writeGaussians(hour, dim, m, means, Cs, dirRes+'results', sufx, ylabel=ylab, zlabel=None)
             for k in range(m):
                 data.loc[:,'w'+str(k)] = ws[k]
             data.to_pickle(dirRes+'weighted'+str(name)+'h'+sufx+'.pkl')

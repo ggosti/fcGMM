@@ -234,40 +234,32 @@ def drawCovEllipse(mean,C,ax,num):
     #ax.legend()
     return lam, v
 
-def plotStuff(dim,m,nk,samples,ps,ws,alpha,means,Cs,time,sufx,xlabel='V450-A',ylabel='PE-A',zlabel='FITC-A',outf=False,path='plots/'):
+def plotStuff(dim,m,nk,samples,ps,ws,alpha,means,Cs,time,sufx,xlabel='V450-A',ylabel='PE-A',zlabel='FITC-A',outf=False,path='plots/',show=False):
     print('outf',outf)
     plt.figure()
     plt.bar(range(m),nk)
 
-    if dim == 2:
-        for k in range(m): 
-            fig = pyplot.figure()
-            ax = Axes3D(fig)        
-            ax.scatter(samples[:,0],samples[:,1],ws[k,:],alpha=0.6)
-    if dim == 1: 
-        plt.figure()
-        plt.hist(samples,bins=100,alpha=0.4,color='y')
-        for k in range(m):
-            x = np.linspace(samples.min(),samples.max(),100)
-            dx = .5*(x[1]-x[0])
-            plt.scatter(samples,ws[k,:]*dx*nk[k])
-	
-    if dim == 2:
-        for k in range(m):
-            fig = pyplot.figure()
-            ax = Axes3D(fig)
-            ax.scatter(samples[:,0],samples[:,1],ps[k,:],alpha=0.6)
-    if dim > 1:
-        for d in range(dim):
+    if show:
+        if dim == 2:
+            for k in range(m): 
+                fig = pyplot.figure()
+                ax = Axes3D(fig)        
+                ax.scatter(samples[:,0],samples[:,1],ws[k,:],alpha=0.6)
+        if dim == 1: 
             plt.figure()
-            plt.hist(samples[:,d],bins=100,alpha=0.4,color='y')
-            x = np.linspace(samples[:,d].min(),samples[:,d].max())
-            dx = .5*(x[1]-x[0])
-            mix = np.zeros_like(x)
+            plt.hist(samples,bins=100,alpha=0.4,color='y')
             for k in range(m):
-                plt.plot(x, multivariate_normal.pdf(x, means[k,d],Cs[k][d,d])*dx*nk[k])
-                mix = mix + multivariate_normal.pdf(x, means[k,d],Cs[k][d,d])*dx*nk[k]
-            plt.plot(x, mix)
+                x = np.linspace(samples.min(),samples.max(),100)
+                dx = .5*(x[1]-x[0])
+                plt.scatter(samples,ws[k,:]*dx*nk[k])
+	
+    if show:
+        if dim == 2:
+            for k in range(m):
+                fig = pyplot.figure()
+                ax = Axes3D(fig)
+                ax.scatter(samples[:,0],samples[:,1],ps[k,:],alpha=0.6)
+    
     if dim == 1: 
         plt.figure()
         plt.hist(samples,bins=100,alpha=0.4,color='y')
@@ -279,6 +271,17 @@ def plotStuff(dim,m,nk,samples,ps,ws,alpha,means,Cs,time,sufx,xlabel='V450-A',yl
             plt.plot(x, multivariate_normal.pdf(x, means[k],Cs[k])*dx*nk[k])
             mix = mix + multivariate_normal.pdf(x, means[k],Cs[k])*dx*nk[k]
         plt.plot(x, mix)
+    if dim > 1:
+        for d in range(dim):
+            plt.figure()
+            plt.hist(samples[:,d],bins=100,alpha=0.4,color='y')
+            x = np.linspace(samples[:,d].min(),samples[:,d].max())
+            dx = .5*(x[1]-x[0])
+            mix = np.zeros_like(x)
+            for k in range(m):
+                plt.plot(x, multivariate_normal.pdf(x, means[k,d],Cs[k][d,d])*dx*nk[k])
+                mix = mix + multivariate_normal.pdf(x, means[k,d],Cs[k][d,d])*dx*nk[k]
+            plt.plot(x, mix)
 
 
     if dim == 2:
@@ -325,24 +328,7 @@ def plotStuff(dim,m,nk,samples,ps,ws,alpha,means,Cs,time,sufx,xlabel='V450-A',yl
         axScatteryz.scatter(np.array(means)[:,1],np.array(means)[:,2],c='black')
     print('outf', outf)
     if outf: plt.savefig(path+str(dim)+'dmixture'+str(time)+'h'+sufx+'.png')
-        #plt.figure()
-        #ax = plt.subplot(111, aspect='equal')
-        #ax.scatter(samples[z0,0],samples[z0,1],c=np.argmax(ws.T,axis=1),alpha=0.6)
-        #for k in range(len(ps)):
-        #    drawCovEllipse(means[k][[0,1]],np.array([Cs[k][[0,1],0],Cs[k][[0,1],1]]),ax)
-        #ax.scatter(np.array(means)[:,0],np.array(means)[:,1],c='black')
-        #plt.figure()
-        #ax = plt.subplot(111, aspect='equal')
-        #ax.scatter(samples[z0,0],samples[z0,2],c=np.argmax(ws.T,axis=1),alpha=0.6)
-        #for k in range(len(ps)):
-        #    drawCovEllipse(means[k][[0,2]],np.array([Cs[k][[0,2],0],Cs[k][[0,2],2]]),ax)
-        #ax.scatter(np.array(means)[:,0],np.array(means)[:,2],c='black')
-        #plt.figure()
-        #ax = plt.subplot(111, aspect='equal')
-        #ax.scatter(samples[z0,1],samples[z0,2],c=np.argmax(ws.T,axis=1),alpha=0.6)
-        #for k in range(len(ps)):
-        #    drawCovEllipse(means[k][[1,2]],np.array([Cs[k][[1,2],1],Cs[k][[1,2],2]]),ax)
-        #ax.scatter(np.array(means)[:,1],np.array(means)[:,2],c='black')
+
 
 def plot2dloglog(x,y):
     # Plot data
@@ -493,7 +479,7 @@ def pltSSCAFSCA(ssca,fsca,gate1,gate2):
 def regenax(x,y,valK,means,sig,ax,title=None,xlab=None,ylab=None):
     ax.clear()     
     if not (title == None):
-    	ax.set_title('Timepoint Hour '+str(hour)+'. Set single gaussain centroid')
+    	ax.set_title(title)
     if not (xlab == None):
     	ax.set_xlabel(xlab)
     if not (ylab == None):
@@ -845,7 +831,7 @@ def prepData(x,y,z,ssca,fsca,gate1,gate2,gate3,name):
     df = df[df['gate'] == 'None']
     return g,df
 
-def noDropOutliers(df,lx,ly,lz):
+def getCols(df,lx,ly,lz):
     x=df[lx]
     y=df[ly]
     z=df[lz]
@@ -867,45 +853,6 @@ def noDropOutliersBgrCorr(df,dfAuto,lx,ly,lz):
     df.loc[:,lx]=x
     df.loc[:,ly]=y
     df.loc[:,lz]=z
-    return df,x,y,z
-
-def dropOutliers(df,label,bins,th):
-    x = df[label]
-    H, edges = np.histogram(x,bins)   
-    Hmask = H<=th
-    for x0,x1 in zip(edges[:-1][Hmask],edges[1:][Hmask]):
-        #print x0,x1
-        df= df[(df[label]<x0)|(df[label]>=x1)]
-    return df
-
-def dropOutliers3d(df,lx,ly,lz,nBins = 100, nObs = 2):
-    df = dropOutliers(df,lx,nBins,nObs)
-    df = dropOutliers(df,ly,nBins,nObs)
-    df = dropOutliers(df,lz,nBins,nObs)
-
-    x=df[lx]
-    y=df[ly]
-    z=df[lz]
-    return df,x,y,z
-
-def dropOutliers3d2(df,lx,ly,lz,nBins = 100, nObs = 2):
-    x=df[lx]
-    y=df[ly]
-    z=df[lz]
-    samples = np.array([x,y,z]).T
-    H, edges = np.histogramdd(samples,nBins)  
-    H = np.rot90(H)
-    H = np.flipud(H) 
-    Hmask = H<=nObs
-    df['mask']=0.0
-    xx,yy,zz = np.meshgrid(edges[0][:-1],edges[1][:-1],edges[2][:-1])
-    xxe,yye,zze = np.meshgrid(edges[0][1:],edges[1][1:],edges[2][1:])
-    for x0,x1,y0,y1,z0,z1 in zip(xx[Hmask],xxe[Hmask],yy[Hmask],yye[Hmask],zz[Hmask],zze[Hmask]):
-        df.loc[(df[lx]>=x0)&(df[lx]<=x1)&(df[ly]>=y0)&(df[ly]<=y1)&(df[lz]>=z0)&(df[lz]<=z1),'mask'] = 1.0
-    df=df[df['mask'] == 0.0]
-    x=df[lx]
-    y=df[ly]
-    z=df[lz]
     return df,x,y,z
 
 
@@ -1016,9 +963,10 @@ def runGM(hour,dim,m,data,res0,sufx,outf=True,show=True,cond=False,xlabel='V450-
     print('means',means)
     print('Cs',Cs)
 
-    if show:
+    if True:#show:
         print('outf',outf,' figure labels ',xlabel,ylabel,zlabel)
-        plotStuff(dim,m,nk,samples,ps,ws,alpha,means,Cs,hour,sufx,outf=outf,xlabel=xlabel,ylabel=ylabel,zlabel=zlabel)
+        plotStuff(dim,m,nk,samples,ps,ws,alpha,means,Cs,hour,sufx,outf=outf,
+        		xlabel=xlabel,ylabel=ylabel,zlabel=zlabel,show=False)
     return means,Cs,ws
 
 
