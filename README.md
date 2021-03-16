@@ -13,7 +13,7 @@ folder3/
 42:data42.fcs
 48:data48.fcs
 ```
-The name of the file my be someting like `fileCTV-PKH.dat`, ehere `CTV` and `PKH` are the names of the fluorescence channel.
+The name of the file my be someting like `fileCTV-PKH.dat`, where `CTV` and `PKH` are the names of the fluorescence channel.
 
 At the first execution we will run the program with the preprocessing flag:
 ```
