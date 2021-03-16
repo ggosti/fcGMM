@@ -17,15 +17,15 @@ The name of the file my be someting like `fileCTV-PKH.dat`, where `CTV` and `PKH
 
 At the first execution we will run the program with the preprocessing flag:
 ```
-python runFcMGM.py --preprocessing --dim 2 -i CTV-PKH
+python runFcMGM.py --preprocessing --dim 2 -i PKH-CTV
 ```
 The flag `-dim` set the number of dimation which can be 1 to 3.
 Then to set the inital values of the mixture of Gaussians model we run:
 ```
-python runFcMGM.py --setInit --dim 2 -i MITO-CTV
+python runFcMGM.py --setInit --dim 2 -i PKH-CTV
 ```
 Finaly, to run the EM mixture of Gaussians model we run:
 ```
-python runFcMGM.py --dim 2 -i MITO-CTV
+python runFcMGM.py --dim 2 -i PKH-CTV
 ```
 

@@ -289,7 +289,7 @@ def plotStuff(dim,m,nk,samples,ps,ws,alpha,means,Cs,time,sufx,xlabel='V450-A',yl
         llim = np.min(samples) - 2
         lim = 18
         axScatterxy,axHistx,axHisty = plot2dloglog2(samples[:,0],samples[:,1],time,llim=llim,lim = lim,xlabel=xlabel,ylabel=ylabel,nbins = nbins) 
-        x = np.linspace(llim,lim,nbins)       
+        x = np.linspace(llim,lim,int(nbins))       
         mixx = np.zeros_like(x)
         mixy = np.zeros_like(x)        
         for k in range(len(ps)):
@@ -490,8 +490,14 @@ def pltSSCAFSCA(ssca,fsca,gate1,gate2):
     return xx, yy,f,kernel
 
 
-def regenax(x,y,valK,means,sig,ax):
-    ax.clear()            
+def regenax(x,y,valK,means,sig,ax,title=None,xlab=None,ylab=None):
+    ax.clear()     
+    if not (title == None):
+    	ax.set_title('Timepoint Hour '+str(hour)+'. Set single gaussain centroid')
+    if not (xlab == None):
+    	ax.set_xlabel(xlab)
+    if not (ylab == None):
+    	ax.set_ylabel(ylab)       
     ax.scatter(x,y,1,c = valK)
     if type(sig) == float:
         C = np.diagflat([sig,sig])

@@ -66,7 +66,8 @@ if __name__=="__main__":
     if ('PKH' in args.i) and ('MITO' in args.i): #args.i == 'dataPKH-CTV-MITO.dat':
         ylab = 'PE-A'
         zlab = 'FITC-A'
-    print('xlab','CTV')
+    xlab = 'V450-A'
+    print('xlab',xlab)
     print('ylab',ylab)
     print('zlab',zlab)
 
@@ -158,7 +159,7 @@ if __name__=="__main__":
                 data = dataframe[name]
                 hour = name
                 dim = 2
-                x = data.loc[:,'log V450-A']
+                x = data.loc[:,'log '+xlab]#V450-A']
                 y = data.loc[:, 'log '+ylab]
                 xx, yy,f,kernel = mgm.getKernel(x,y)
                 xy = np.vstack([x,y])
@@ -180,12 +181,11 @@ if __name__=="__main__":
                 fig, ax = plt.subplots()
                 plt.subplots_adjust(left=0.25, bottom=0.30)  
                 ax.scatter(x,y,1,c = valK)
-                ax.set_xlabel('V450-A')
-                ax.set_ylabel(ylab)
                 #print('means',means)
                 #for i,m,c in zip(range(len(means)),means,Cs):
                     # lam,v = mgm.drawCovEllipse(m,c,ax,i)
-                mgm.regenax(x,y,valK,means,Cs,ax)
+                title = 'Timepoint Hour '+str(hour)+'. Set single gaussain centroid'
+                mgm.regenax(x,y,valK,means,Cs,ax,title,xlab,ylab)
                 #mgm.regenax(x,y,valK,m,mean,sig,ax)
                 #m = input("Enter number of Goussians: ") 
                 #plt.show()
@@ -196,7 +196,7 @@ if __name__=="__main__":
                     print('x = %d, y = %d'%(ix, iy) )
                     means.append(np.array([ix, iy]))
                     Cs.append(np.array([[sig, 0],[0,sig]]))
-                    mgm.regenax(x,y,valK,means,Cs,ax)
+                    mgm.regenax(x,y,valK,means,Cs,ax,title,xlab,ylab)
                     fig.canvas.draw_idle()
                     #fig.canvas.mpl_disconnect(cid)
                     #if len(means) == m:
@@ -208,8 +208,7 @@ if __name__=="__main__":
 
                 fig, ax = plt.subplots()
                 plt.subplots_adjust(left=0.25, bottom=0.30)
-                ax.set_xlabel('V450-A')
-                ax.set_ylabel(ylab)
+                title = 'Timepoint Hour '+str(hour)+'. Set single gaussain mean and var'
                 #sigs = []
                 #if Cs == None:            
                 #    for i in range(m):
@@ -217,7 +216,7 @@ if __name__=="__main__":
                 #else:
                 #for C in Cs:
                 #    sigs.append(C)
-                mgm.regenax(x,y,valK,means,Cs,ax)
+                mgm.regenax(x,y,valK,means,Cs,ax,title,xlab,ylab)
 
                 gauss = 0
                 axM = plt.axes([0.25, 0.25, 0.65, 0.03])#, facecolor=axcolor)
@@ -246,7 +245,7 @@ if __name__=="__main__":
                     sigy = sSigy.val
                     Cs[gauss] = np.array([[sigx,0],[0,sigy]])
                     print('Cs',Cs)
-                    mgm.regenax(x,y,valK,means,Cs,ax)
+                    mgm.regenax(x,y,valK,means,Cs,ax,title,xlab,ylab)
                     fig.canvas.draw_idle()
                 #sM.on_changed(update)
                 sMx.on_changed(update)
