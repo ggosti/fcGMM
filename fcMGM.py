@@ -704,65 +704,6 @@ def plotEstObsComp(k,pos,H,est,means,Cs):
         plt.figure()
         plt.scatter(np.sqrt(deltax[H>5]**2+deltay[H>5]**2+deltaz[H>5]**2), (est[H>5] - H[H>5])**2/(est[H>5]) )
 
-def driftMean(rs,k,nk,pos,binWidths,binArea,H,means,Cs,dim):
-    drfChi = []
-    for r in rs:
-        if means.shape[1]==2:
-            if dim == 'x': drift = [r,0.]
-            else: drift = [r,0.]
-        if means.shape[1]==3:
-            if dim == 'x': drift = [r,0.,0.]
-            if dim == 'y': drift = [r,0.,0.]
-            else: drift = [r,0.,0.]
-        means2 = means.copy()
-        means2[k] = means2[k] + drift
-        #print means,means2,drift
-        est = binEstimates2(k,nk,pos,binWidths,binArea,means2,Cs)
-        #mgm.plotEstObsComp(k,xx,yy,H,est,means2)
-        drfChi.append(np.mean( (est[H>5] - H[H>5])**2/(est[H>5]) ))
-    mind = rs[np.argmin(drfChi)]
-    return mind,drfChi
-
-def driftMeanRad(rs,k,nk,samples,ws,nBins,H,means,Cs,dim):
-    drfChi = []
-    for r in rs:
-        if means.shape[1]==2:
-            if dim == 'x': drift = [r,0.]
-            else: drift = [r,0.]
-        if means.shape[1]==3:
-            if dim == 'x': drift = [r,0.,0.]
-            if dim == 'y': drift = [r,0.,0.]
-            else: drift = [r,0.,0.]
-        means2 = means.copy()
-        means2[k] = means2[k] + drift
-        #print means,means2,drift
-        H,dxp,pos,edges = binObservationsRad(means2,Cs,k,samples,ws,nbins = nBins)
-        est = binEstimatesRad(k,nk,edges,means2,Cs)
-        #plotEstObsComp(k,pos,H,est,means)
-        drfChi.append(np.mean( (est[H>5] - H[H>5])**2/(est[H>5]) ))
-        #print np.mean( (est[H>5] - H[H>5])**2/(est[H>5]) )
-    mind = rs[np.argmin(drfChi)]
-    return mind,drfChi
-
-def driftVar(rs,k,nk,pos,binWidths,binArea,H,means,Cs,dim):
-    drfChi = []
-    for r in rs:
-        if means.shape[1]==2:
-            if dim == 'xx': drift = np.array([[r,0.],[0.,0.]]) 
-            elif dim == 'yy': drift = np.array([[0.,0.],[0.,r]]) 
-            else: drift = np.array([[0.,r],[r,0.]]) 
-        if means.shape[1]==3:
-            if dim == 'xx': drift = np.array([[r,0.,0.],[0.,0.,0.],[0.,0.,0.]]) 
-            elif dim == 'yy': drift = np.array([[0.,0.,0.],[0.,r,0.],[0.,0.,0.]]) 
-            else: drift = np.array([[0.,r,0.],[r,0.,0.],[0.,0.,0.]]) 
-        Cs2 = list(Cs)
-        Cs2[k] = Cs2[k] + drift
-        est = binEstimates2(k,nk,pos,binWidths,binArea,means,Cs2)
-        #mgm.plotEstObsComp(k,xx,yy,H,est,means2)
-        drfChi.append(np.mean( (est[H>5] - H[H>5])**2/(est[H>5]) ))
-    mind = rs[np.argmin(drfChi)]
-    return mind,drfChi
-
 def pairgrid_heatmap(x, y, **kws):
     #print kws
     color = kws.pop("color")
@@ -835,24 +776,6 @@ def getCols(df,lx,ly,lz):
     x=df[lx]
     y=df[ly]
     z=df[lz]
-    return df,x,y,z
-
-def noDropOutliersBgrCorr(df,dfAuto,lx,ly,lz):
-    xauto,yauto,zauto = dfAuto[lx].mean(),dfAuto[ly].mean(),dfAuto[lz].mean()
-    x=df[lx]
-    y=df[ly]
-    z=df[lz]
-    cut = (x>xauto) & (y>yauto) & (z>zauto)
-    x = x[cut]
-    y = y[cut]
-    z = z[cut]
-    x = np.log2(2**x - 2**xauto)
-    y = np.log2(2**y - 2**yauto)
-    z = np.log2(2**z - 2**zauto)
-    df = df[cut]
-    df.loc[:,lx]=x
-    df.loc[:,ly]=y
-    df.loc[:,lz]=z
     return df,x,y,z
 
 
@@ -1159,47 +1082,3 @@ def writeGaussians(hour,dim,m,means,Cs,suffix,sufx,means_chunck=[],vars_chunck=[
             if dim > 2: results.loc[2,'std Cs '+zlabel+' '+str(k)] =  np.std(vars_chunck[k,2])
 
     results.to_csv(suffix+'-dim'+str(dim)+'-'+str(hour)+'h-'+sufx+'.csv')
-
-def resample(data,dim,m,hour,res0,means,Cs,sufx,chunkNum = 10,xlabel='V450-A',ylabel='PE-A',zlabel='FITC-A'):
-    dimMap = {0:xlabel,1:ylabel}
-    # resample
-    data = data.sample(frac=1).reset_index(drop=True)
-    if dim >1:
-        print(len(data))
-        
-        chunck = {}
-
-        for g, df in data.groupby(np.arange(len(data)) // (len(data)/chunkNum) ):
-            print(g, len(df))
-            chunck[g] = df
-
-        means_chunck = np.zeros((m,dim,chunkNum))
-        vars_chunck = np.zeros((m,dim,chunkNum))
-
-        for i in range(0,chunkNum):
-            print('chunk',i,len(chunck[i]))
-            means_ch,Cs_ch,ws = runGM(hour,dim,m,chunck[i],res0,sufx,outf=False,show=False,xlabel=xlabel,ylabel=ylabel,zlabel=zlabel)
-            means_chunck[:,:,i] = means_ch
-            for k in range(m):
-                for d in range(dim):
-                    vars_chunck[k,d,i] = Cs_ch[k][d,d]
-
-        for d in range(dim):
-            plt.figure()
-            plt.title('means '+dimMap[d])
-            for k in range(m):
-                plt.hist(means_chunck[k,d],label=str(k))
-                plt.scatter(means[k,d],4.5)
-                print(np.mean(means_chunck[k,d]),np.std(means_chunck[k,d]))
-            plt.legend()
-
-
-        for d in range(dim):
-            plt.figure()
-            plt.title('vars '+dimMap[d])
-            for k in range(m):
-                plt.hist(vars_chunck[k,d],label=str(k))
-                plt.scatter(Cs[k][d,d],4.5)
-                print(np.mean(vars_chunck[k,d]),np.std(vars_chunck[k,d]))
-            plt.legend()
-        return means_chunck,vars_chunck
