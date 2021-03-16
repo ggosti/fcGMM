@@ -817,7 +817,7 @@ def prepData(x,y,z,ssca,fsca,gate1,gate2,gate3,name):
     #print len(gateN),len(np.log2(x))
     df = pd.DataFrame({'log V450-A':np.log2(x),'log PE-A':np.log2(y),'log FITC-A':np.log2(z),'ssca':ssca,'fsca':fsca,'gate':gateN})
     #df = df[np.isfinite(df['log V450-A']) & np.isfinite(df['log PE-A']) & np.isfinite(df['log FITC-A'])]
-    g = sns.PairGrid(df, vars= ['log V450-A','log PE-A','log FITC-A','ssca','fsca'] ,diag_sharey=False,size=1.5, hue="gate")
+    g = sns.PairGrid(df, vars= ['log V450-A','log PE-A','log FITC-A','ssca','fsca'] ,diag_sharey=False,height=1.5, hue="gate")
     #g.map_lower(pairgrid_heatmap)
     g.map_lower(plt.scatter, s = 2.0, alpha = 0.3)
     g.map_diag(plt.hist, bins=40)
