@@ -20,6 +20,9 @@ At the first execution we will run the program with the preprocessing flag:
 python runFcMGM.py --preprocessing --dim 2 -i PKH-CTV
 ```
 The flag `-dim` set the number of dimation which can be 1 to 3.
+
+![plot](./preproc.png)
+
 Then to set the inital values of the mixture of Gaussians model we run:
 ```
 python runFcMGM.py --setInit --dim 2 -i PKH-CTV
