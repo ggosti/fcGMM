@@ -15,6 +15,7 @@ from scipy.spatial import distance
 
 from matplotlib.patches import Ellipse
 from matplotlib.ticker import NullFormatter
+from matplotlib.ticker import MaxNLocator
 
 import scipy.stats as st
 import seaborn as sns
@@ -192,8 +193,6 @@ def runConEM(samples,z0,means,Cs,m,const='mean-shift',show=True):
                 Cs.append(C)
                 #print 'C',C
                 Ct[k,0].append(C)
-        #print Cs
-        #plotStuff(dim,m,nk,samples,ps,ws,alpha,means,Cs)
         if dim > 1:                
             for k in range(m):
                 if np.linalg.det(Cs[k]) < 10**-8:
@@ -236,19 +235,23 @@ def drawCovEllipse(mean,C,ax,num):
 
 def plotStuff(dim,m,nk,samples,ps,ws,alpha,means,Cs,time,sufx,xlabel='V450-A',ylabel='PE-A',zlabel='FITC-A',outf=False,path='plots/',show=False):
     print('outf',outf)
-    plt.figure()
-    plt.bar(range(m),nk)
+    fig, ax = plt.subplots(1,1)
+    ax.set_title('Single Gaussian Distribution Frequency')
+    ax.bar(range(m),nk)
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 
     if show:
         if dim == 2:
             for k in range(m): 
                 fig = pyplot.figure()
                 ax = Axes3D(fig)        
+                ax.set_title('Sample with weights, Time point '+str(time)+' h ')
                 ax.scatter(samples[:,0],samples[:,1],ws[k,:],alpha=0.6)
         if dim == 1: 
             plt.figure()
             plt.hist(samples,bins=100,alpha=0.4,color='y')
             for k in range(m):
+                ax.set_title('Sample with weights, Time point '+str(time)+' h ')
                 x = np.linspace(samples.min(),samples.max(),100)
                 dx = .5*(x[1]-x[0])
                 plt.scatter(samples,ws[k,:]*dx*nk[k])
@@ -257,11 +260,13 @@ def plotStuff(dim,m,nk,samples,ps,ws,alpha,means,Cs,time,sufx,xlabel='V450-A',yl
         if dim == 2:
             for k in range(m):
                 fig = pyplot.figure()
+                ax.set_title('Sample with posterior probability dist., Time point '+str(time)+' h ')
                 ax = Axes3D(fig)
                 ax.scatter(samples[:,0],samples[:,1],ps[k,:],alpha=0.6)
     
     if dim == 1: 
         plt.figure()
+        ax.set_title('Sample with posterior probability dist., Time point '+str(time)+' h ')
         plt.hist(samples,bins=100,alpha=0.4,color='y')
         x = np.linspace(samples.min(),samples.max())
         dx = .5*(x[1]-x[0])
@@ -274,6 +279,7 @@ def plotStuff(dim,m,nk,samples,ps,ws,alpha,means,Cs,time,sufx,xlabel='V450-A',yl
     if dim > 1:
         for d in range(dim):
             plt.figure()
+            plt.title('Marginals posterior probability dist., Time point '+str(time)+' h ')
             plt.hist(samples[:,d],bins=100,alpha=0.4,color='y')
             x = np.linspace(samples[:,d].min(),samples[:,d].max())
             dx = .5*(x[1]-x[0])
@@ -282,6 +288,9 @@ def plotStuff(dim,m,nk,samples,ps,ws,alpha,means,Cs,time,sufx,xlabel='V450-A',yl
                 plt.plot(x, multivariate_normal.pdf(x, means[k,d],Cs[k][d,d])*dx*nk[k])
                 mix = mix + multivariate_normal.pdf(x, means[k,d],Cs[k][d,d])*dx*nk[k]
             plt.plot(x, mix)
+            if d == 0: plt.xlabel(xlabel)
+            if d == 1: plt.xlabel(ylabel)
+            if d == 2: plt.xlabel(zlabel)
 
 
     if dim == 2:
@@ -309,6 +318,8 @@ def plotStuff(dim,m,nk,samples,ps,ws,alpha,means,Cs,time,sufx,xlabel='V450-A',yl
         axHistx.plot(x, mixx)
         axHisty.plot(mixy,x)
         axScatterxy.scatter(np.array(means)[:,0],np.array(means)[:,1],c='black')
+        #axScatterxy.set_xlabel(xlabel)
+        #axScatterxy.set_ylabel(ylabel)
     if dim == 3:
         nbins = 100.0
         llim = np.min(samples) - 2
