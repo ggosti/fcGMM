@@ -21,7 +21,7 @@ python runFcMGM.py --preprocessing --dim 2 -i PKH-CTV
 ```
 The flag `--dim` set the number of dimation which can be 1 to 3.
 The `--preprocessing` flag allows to set the threshod for forward scattering (FSC-A) and
-side scattering (SSCA). It also allows to treshold outliers using the estimate of the density function of the scatter plot computed using a gaussina kernel.
+side scattering (SSCA). It also allows to treshold outliers using the estimate of the density function of the scatter plot computed using a gaussin kernel.
 
 ![plot](./preproc.png)
 

@@ -788,7 +788,7 @@ def doPreproc(datafile,sufx,aqName2,path):
         ax.scatter(ssca[valK>th],fsca[valK>th],c=valK[valK>th])
         ax.scatter(ssca[gate1],fsca[gate1],c='red')
         ax.scatter(ssca[gate2],fsca[gate2],c='yellow')
-        ax.set_title(str(k)+' h '+meta['EXPORT TIME'][:6]+' '+meta['$ETIM']+' th :'+str(th))
+        ax.set_title('Timepoint '+str(k)+' h '+meta['EXPORT TIME'][:6]+' '+meta['$ETIM'])
         dataPars[k]['date'] = meta['EXPORT TIME'][:6]
         dataPars[k]['time'] = meta['$ETIM']
 
