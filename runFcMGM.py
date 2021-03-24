@@ -321,4 +321,5 @@ if __name__=="__main__":
             plt.show()
             for k in range(m):
                 data.loc[:,'w'+str(k)] = ws[k]
-            data.to_pickle(dirRes+'weighted'+str(name)+'h'+sufx+'.pkl')
+            data.to_pickle(dirRes+'weighted'+str(name)+'h'+sufx+'.pkl',protocol=3)
+            data.to_csv(dirRes+'weighted'+str(name)+'h'+sufx+'.csv', index=False)
