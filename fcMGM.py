@@ -548,22 +548,20 @@ def rewriteGates(gate1,gate2,gate3):
             else: gateN[i] = 'gate 3'
     return gateN
 
-def prepData(x,y,z,ssca,fsca,gate1,gate2,gate3,name):
-    #boolVal = (x>2**4)*(y>2**4)*(z>2**4)#*(np.isfinite(x))*(np.isfinite(y))*(np.isfinite(z))
-    #x=x[boolVal]
-    #y=y[boolVal]
-    #z=z[boolVal]
-    #ssca = ssca[boolVal]
-    #fsca = fsca[boolVal]
-    #gate1 = (fsca<10000)|(fsca>260000)
-    #gate2 = (ssca<10000)|(ssca>250000)
-    #gate3 = (x<2**8)|(y<2**8)|(z<2**8)
-    #print len(gate1),len(gate2),len(gate3)
+def prepData(x,y,z,ssca,fsca,gate1,gate2,gate3,name,xlabel,ylabel,zlabel):
+    #print(len(gate1),len(gate2),len(gate3))
     gateN = rewriteGates(gate1,gate2,gate3)
-    #print len(gateN),len(np.log2(x))
-    df = pd.DataFrame({'log V450-A':np.log2(x),'log PE-A':np.log2(y),'log FITC-A':np.log2(z),'ssca':ssca,'fsca':fsca,'gate':gateN})
-    #df = df[np.isfinite(df['log V450-A']) & np.isfinite(df['log PE-A']) & np.isfinite(df['log FITC-A'])]
-    g = sns.PairGrid(df, vars= ['log V450-A','log PE-A','log FITC-A','ssca','fsca'] ,diag_sharey=False,height=1.5, hue="gate")
+    #print(len(gateN),len(np.log2(x)))
+    if not zlabel == None:
+        df = pd.DataFrame({'log '+xlabel:np.log2(x),'log '+ylabel:np.log2(y),
+                           'log '+zlabel:np.log2(z),'ssca':ssca,'fsca':fsca,'gate':gateN})
+        g = sns.PairGrid(df, vars= ['log '+xlabel,'log '+ylabel,'log '+zlabel,'ssca','fsca'],
+                                             diag_sharey=False,height=1.5, hue="gate")
+    else:
+        df = pd.DataFrame({'log '+xlabel:np.log2(x),'log '+ylabel:np.log2(y),
+                           'ssca':ssca,'fsca':fsca,'gate':gateN})
+        g = sns.PairGrid(df, vars= ['log '+xlabel,'log '+ylabel,'ssca','fsca'],
+                                             diag_sharey=False,height=1.5, hue="gate")
     #g.map_lower(pairgrid_heatmap)
     g.map_lower(plt.scatter, s = 2.0, alpha = 0.3)
     g.map_diag(plt.hist, bins=40)
@@ -571,16 +569,17 @@ def prepData(x,y,z,ssca,fsca,gate1,gate2,gate3,name):
     g.axes[0,0].set_title(name)
     g.axes[0,1].set_ylim([0.1,18]) 
     g.axes[0,2].set_ylim([0.1,18])
-    g.axes[1,0].set_ylim([0.1,18])
-    g.axes[1,2].set_ylim([0.1,18]) 
-    g.axes[2,0].set_ylim([0.1,18])
-    g.axes[2,1].set_ylim([0.1,18]) 
+    g.axes[1,0].set_ylim([0.1,18]) 
     g.axes[3,0].set_xlim([0.1,18])
     g.axes[3,1].set_xlim([0.1,18])
-    g.axes[3,2].set_xlim([0.1,18]) 
-    g.axes[4,0].set_xlim([0.1,18])
-    g.axes[4,1].set_xlim([0.1,18])
-    g.axes[4,2].set_xlim([0.1,18])
+    if not zlabel == None:
+        g.axes[2,0].set_ylim([0.1,18])
+        g.axes[2,1].set_ylim([0.1,18])
+        g.axes[1,2].set_ylim([0.1,18]) 
+        g.axes[3,2].set_xlim([0.1,18]) 
+        g.axes[4,0].set_xlim([0.1,18])
+        g.axes[4,1].set_xlim([0.1,18])
+        g.axes[4,2].set_xlim([0.1,18])
 
     df = df[df['gate'] == 'None']
     return g,df
@@ -750,7 +749,7 @@ def readPreProcPars(aqName):
             print('new ', dataPars[a])
     return dataPars
 
-def doPreproc(datafile,sufx,aqName2,path):
+def doPreproc(datafile,sufx,aqName2,path,xlabel,ylabel,zlabel):
     dataframe = {}
     aqName = getAq(datafile)
     dataPars = readPreProcPars(aqName)
@@ -760,14 +759,20 @@ def doPreproc(datafile,sufx,aqName2,path):
         meta, data = fcsparser.parse(f, meta_data_only=False, reformat_meta=True)
         print('acquisition ',k)
         print(meta['EXPORT TIME'],meta['$ETIM'])
-        x=data['V450-A']
-        y=data['PE-A']
-        z=data['FITC-A']
+        x=data[xlabel]
+        y=data[ylabel]
+        if not zlabel == None:
+            z=data[zlabel]
+        else:
+            z=np.ones_like(x)
         gate0 = (x>0)&(y>0)&(z>0)
         data = data[gate0]
-        x=data['V450-A']
-        y=data['PE-A']
-        z=data['FITC-A']
+        x=data[xlabel]
+        y=data[ylabel]
+        if not zlabel == None:
+            z=data[zlabel]
+        else:
+            z=np.ones_like(x)
         ssca = data['SSC-A']
         fsca = data['FSC-A']
         vs,vf = dataPars[k]['ssca hf'],dataPars[k]['fsca hf']
@@ -828,7 +833,7 @@ def doPreproc(datafile,sufx,aqName2,path):
             v = sth.val
             th = (10**(-v))
             gateTh = valK<th
-            graph,dfTh = prepData(x,y,z,ssca,fsca,gateTh,gate1,gate2,str(k)+'h')
+            graph,dfTh = prepData(x,y,z,ssca,fsca,gateTh,gate1,gate2,str(k)+'h',xlabel,ylabel,zlabel)
             print('drop rate ',float(len(dfTh))/float(len(data)),' original sample size ',len(data), ' th. sample size ',len(dfTh))
             dataPars[k]['preprocessing drop rate'] = float(len(dfTh))/float(len(data))
             dataPars[k]['th'] = th
@@ -841,7 +846,8 @@ def doPreproc(datafile,sufx,aqName2,path):
         bUp.on_clicked(updateTh)
         
         gateTh = valK<th
-        graph,dfTh = prepData(x,y,z,ssca,fsca,gateTh,gate1,gate2,str(k)+' h')
+        graph,dfTh = prepData(x,y,z,ssca,fsca,gateTh,
+                               gate1,gate2,str(k)+' h',xlabel,ylabel,zlabel)
         dataPars[k]['preprocessing drop rate'] = float(len(dfTh))/float(len(data))
         dataPars[k]['th'] = th
         dataPars[k]['ssca hf'] = sthssca.val
@@ -859,6 +865,7 @@ def doPreproc(datafile,sufx,aqName2,path):
 
 
     for a in aqName:
+        print('a',a)
         print(dataPars[a])
 
     with open('preproc-pars.csv', 'w') as f:  # Just use 'w' mode in 3.x

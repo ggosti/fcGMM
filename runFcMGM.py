@@ -67,6 +67,10 @@ if __name__=="__main__":
         ylab = 'PE-A'
         zlab = 'FITC-A'
     xlab = 'V450-A'
+    if ('CTY' in args.i) and ('MITOFR' in args.i):#args.i == 'dataPKH-CTV.dat':
+        xlab = 'PE-A'
+        ylab = 'APC-A'
+        zlab = None
     print('xlab',xlab)
     print('ylab',ylab)
     print('zlab',zlab)
@@ -110,13 +114,18 @@ if __name__=="__main__":
 
     if args.preprocessing:
         print('-------------------run preprocessing-------------------------')
-        dataframe = mgm.doPreproc(datafile, sufx, names, dirClean)
+        dataframe = mgm.doPreproc(datafile, sufx, names, dirClean,xlab,ylab,zlab)
 
         name = 'AutoFl'
         dfAuto = dataframe[name]
         lx = 'log V450-A'
         ly = 'log PE-A'
         lz ='log FITC-A'
+        if ('CTY' in args.i) and ('MITOFR' in args.i):#args.i == 'dataPKH-CTV.dat':
+            lx = 'log PE-A'
+            ly = 'log APC-A'
+            lz = None
+
 
         temp,x,y,z = mgm.getCols(dfAuto,lx,ly,lz)
         mgm.plot3dloglog(x,y,z,name,llim=1,xlabel=lx,ylabel=ly,zlabel=lz,dfAuto=dfAuto)
@@ -132,7 +141,8 @@ if __name__=="__main__":
                 print('df shape',df.shape)
                 df,x,y,z = mgm.getCols(df,lx,ly,lz)
                 print('df shape',df.shape)
-                mgm.plot3dloglog(x,y,z,namestr,llim=1,xlabel=lx,ylabel=ly,zlabel=lz,dfAuto=dfAuto)
+                mgm.plot3dloglog(x,y,z,namestr,llim=1,
+                        xlabel=lx,ylabel=ly,zlabel=lz,dfAuto=dfAuto)
                 plt.savefig(dirPlots+'3dplot'+str(name)+'h-cor.png')
         plt.show()
     else:
@@ -170,7 +180,8 @@ if __name__=="__main__":
                 if os.path.isfile(initFN):
                     res0 = pd.read_csv(initFN)
                     m = np.sum(['mean' in r for r in res0.columns])
-                    means , Cs = mgm.getMeanCsFromRes(res0,m,dim,ylabel=ylab,zlabel=zlab)
+                    means , Cs = mgm.getMeanCsFromRes(res0,m,dim,
+                                                        xlabel=xlab,ylabel=ylab,zlabel=zlab)
                     print(means , Cs)
                     sig = 0.04
                 else:               
@@ -280,7 +291,10 @@ if __name__=="__main__":
                 #for s in sigs:
                 #    C = np.diagflat(s)
                 #    Cs.append(C)
-                mgm.writeGaussians(hour,dim,m,means,Cs,dirInit+'init',sufx,ylabel=ylab,zlabel=zlab)
+                print('xlab',xlab)
+                mgm.writeGaussians(hour,dim,m,means,Cs,
+                                   dirInit+'init',sufx,
+                                    xlabel=xlab,ylabel=ylab,zlabel=zlab)
 
 
     print('-------------------run mixture of gaussian-------------------------')
