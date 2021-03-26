@@ -749,6 +749,23 @@ def readPreProcPars(aqName):
             print('new ', dataPars[a])
     return dataPars
 
+def removeZeros(data,xlabel,ylabel,zlabel):
+    x=data[xlabel]
+    y=data[ylabel]
+    if not zlabel == None:
+        z=data[zlabel]
+    else:
+        z=np.ones_like(x)
+    gate0 = (x>0)&(y>0)&(z>0)
+    data = data[gate0]
+    x=data[xlabel]
+    y=data[ylabel]
+    if not zlabel == None:
+        z=data[zlabel]
+    else:
+        z=np.ones_like(x)
+    return x,y,z,data
+
 def doPreproc(datafile,sufx,aqName2,path,xlabel,ylabel,zlabel):
     dataframe = {}
     aqName = getAq(datafile)
@@ -759,27 +776,15 @@ def doPreproc(datafile,sufx,aqName2,path,xlabel,ylabel,zlabel):
         meta, data = fcsparser.parse(f, meta_data_only=False, reformat_meta=True)
         print('acquisition ',k)
         print(meta['EXPORT TIME'],meta['$ETIM'])
-        x=data[xlabel]
-        y=data[ylabel]
-        if not zlabel == None:
-            z=data[zlabel]
-        else:
-            z=np.ones_like(x)
-        gate0 = (x>0)&(y>0)&(z>0)
-        data = data[gate0]
-        x=data[xlabel]
-        y=data[ylabel]
-        if not zlabel == None:
-            z=data[zlabel]
-        else:
-            z=np.ones_like(x)
+        x,y,z,data = removeZeros(data,xlabel,ylabel,zlabel)
+        
         ssca = data['SSC-A']
         fsca = data['FSC-A']
         vs,vf = dataPars[k]['ssca hf'],dataPars[k]['fsca hf']
         gate1 = (fsca<dataPars[k]['fsca lf'])|(fsca>vf)
         gate2 = (ssca<dataPars[k]['ssca lf'])|(ssca>vs)
 
-        xx, yy,f,kernel =getKernel(ssca,fsca)
+        xx, yy,f,kernel =getKernel(fsca,ssca)
         th = dataPars[k]['th']
         #print th
         v = -np.log10(th)
@@ -787,12 +792,12 @@ def doPreproc(datafile,sufx,aqName2,path,xlabel,ylabel,zlabel):
 
         fig, ax = plt.subplots()
         plt.subplots_adjust(left=0.15, bottom=0.35)
-        xy = np.vstack([ssca,fsca])
+        xy = np.vstack([fsca,ssca])
         valK = kernel(xy)
-        ax.scatter(ssca,fsca)
-        ax.scatter(ssca[valK>th],fsca[valK>th],c=valK[valK>th])
-        ax.scatter(ssca[gate1],fsca[gate1],c='red')
-        ax.scatter(ssca[gate2],fsca[gate2],c='yellow')
+        ax.scatter(fsca,ssca)
+        ax.scatter(fsca[valK>th],ssca[valK>th],c=valK[valK>th])
+        ax.scatter(fsca[gate1],ssca[gate1],c='red')
+        ax.scatter(fsca[gate2],ssca[gate2],c='yellow')
         ax.set_title('Timepoint '+str(k)+' h '+meta['EXPORT TIME'][:6]+' '+meta['$ETIM'])
         dataPars[k]['date'] = meta['EXPORT TIME'][:6]
         dataPars[k]['time'] = meta['$ETIM']
@@ -818,10 +823,10 @@ def doPreproc(datafile,sufx,aqName2,path,xlabel,ylabel,zlabel):
             #print 'th',th
             #print v
             ax.clear()
-            ax.scatter(ssca,fsca)
-            ax.scatter(ssca[valK>th],fsca[valK>th],10.,c=valK[valK>th])
-            ax.scatter(ssca[gate1],fsca[gate1],10.,c='red')
-            ax.scatter(ssca[gate2],fsca[gate2],10.,c='yellow')
+            ax.scatter(fsca,ssca)
+            ax.scatter(fsca[valK>th],ssca[valK>th],10.,c=valK[valK>th])
+            ax.scatter(fsca[gate1],ssca[gate1],10.,c='red')
+            ax.scatter(fsca[gate2],ssca[gate2],10.,c='yellow')
             ax.set_title(str(k)+' h '+meta['EXPORT TIME'][:6]+' '+meta['$ETIM']+' th :'+str(th))
             fig.canvas.draw_idle()
         sth.on_changed(update)
