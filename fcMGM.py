@@ -414,8 +414,8 @@ def plot2dloglog2(x,y,time,llim=8,lim = 18,xlabel='x',ylabel='y',nbins = 100.0):
     axHistx.set_title(str(time)+' h '+ str(len(x)) +' events')
     #xymax = np.max([np.max(np.fabs(x)), np.max(np.fabs(y))])
     plotScatter2dloglog(axScatter,x,y,llim,lim,nbins=nbins)
-    axScatter.set_xlabel('x')
-    axScatter.set_ylabel('y')
+    #axScatter.set_xlabel('x')
+    #axScatter.set_ylabel('y')
     binwidth = (lim-llim)/nbins
     bins = np.arange(llim, lim + binwidth, binwidth)
     #print bins
@@ -746,7 +746,7 @@ def readPreProcPars(aqName):
         except:
             d = {'aq. name': a,'th':10**-11,'fsca lf':10000,'fsca hf':250000,'ssca lf':10000,'ssca hf':250000}
             dataPars[a] = d
-            print('new ', dataPars[a])
+            #print('new ', dataPars[a])
     return dataPars
 
 def removeZeros(data,xlabel,ylabel,zlabel):
@@ -764,6 +764,7 @@ def removeZeros(data,xlabel,ylabel,zlabel):
         z=data[zlabel]
     else:
         z=np.ones_like(x)
+        z[:]=np.nan
     return x,y,z,data
 
 def doPreproc(datafile,sufx,aqName2,path,xlabel,ylabel,zlabel):
@@ -777,7 +778,6 @@ def doPreproc(datafile,sufx,aqName2,path,xlabel,ylabel,zlabel):
         print('acquisition ',k)
         print(meta['EXPORT TIME'],meta['$ETIM'])
         x,y,z,data = removeZeros(data,xlabel,ylabel,zlabel)
-        
         ssca = data['SSC-A']
         fsca = data['FSC-A']
         vs,vf = dataPars[k]['ssca hf'],dataPars[k]['fsca hf']

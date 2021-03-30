@@ -71,16 +71,15 @@ if __name__=="__main__":
         xlab = 'PE-A'
         ylab = 'APC-A'
         zlab = None
-    print('xlab',xlab)
-    print('ylab',ylab)
-    print('zlab',zlab)
+    print('xlab',xlab,'ylab',ylab,'zlab',zlab)
 
     datadir = ''
     with open(sufx+'.dat') as f:
+        print('read .dat')
         for line in f:
             line = line[:-1]
-            print(line)
-            print(line.split(':'))
+            #print(line)
+            #print(line.split(':'))
             if os.path.isdir(dirEx+line):
                 datadir = dirEx+line
             elif os.path.isfile(datadir+line.split(':')[-1]):
@@ -108,9 +107,11 @@ if __name__=="__main__":
     if args.times == [-1, -2, -3]:
         names = mgm.getAq(datafile)
     else:
+        #print('times',args.times)
         names = args.times
         names.sort()
-    print('-----names-----', names)
+        names = ['AutoFl']+names
+    #print('-----names-----', names)
 
     if args.preprocessing:
         print('-------------------run preprocessing-------------------------')
