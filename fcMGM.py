@@ -407,11 +407,14 @@ def plotScatter2dloglog(axScatter,x,y,llim,lim,maskVal=0, nbins = 100.0):
     axScatter.plot([llim, lim],[llim, lim])
     return H    
 
-def plot2dloglog2(x,y,time,llim=8,lim = 18,xlabel='x',ylabel='y',nbins = 100.0):
+def plot2dloglog2(x,y,time,llim=8,lim = 18,xlabel='x',ylabel='y',nbins = 100.0,dfAuto=None):
     # Plot data
-    fig = plt.figure(figsize=(8, 8))
+    fig = plt.figure(figsize=(12, 12))
     axScatter,axHistx,axHisty = initAx2dloglog(fig)
-    axHistx.set_title(str(time)+' h '+ str(len(x)) +' events')
+    if isinstance(time, int):
+        axHistx.set_title(str(time)+' h '+ str(len(x)) +' events')
+    else:
+        axHistx.set_title(time+ str(len(x)) +' events')
     #xymax = np.max([np.max(np.fabs(x)), np.max(np.fabs(y))])
     plotScatter2dloglog(axScatter,x,y,llim,lim,nbins=nbins)
     #axScatter.set_xlabel('x')
@@ -427,6 +430,9 @@ def plot2dloglog2(x,y,time,llim=8,lim = 18,xlabel='x',ylabel='y',nbins = 100.0):
     axScatter.set_ylabel(ylabel)
     axScatter.set_xlabel(xlabel)
     axHisty.set_xlabel(ylabel)
+    if isinstance(dfAuto, pd.DataFrame):
+        axHistx.hist(dfAuto[xlabel],range=(llim,lim),bins=bins,histtype='step')
+        axHisty.hist(dfAuto[ylabel],range=(llim,lim),bins=bins,histtype='step', orientation='horizontal')
     return axScatter,axHistx,axHisty
 
 def initAx3dloglog(fig):
@@ -587,8 +593,11 @@ def prepData(x,y,z,ssca,fsca,gate1,gate2,gate3,name,xlabel,ylabel,zlabel):
 def getCols(df,lx,ly,lz):
     x=df[lx]
     y=df[ly]
-    z=df[lz]
-    return df,x,y,z
+    if lz == None :
+        return df,x,y
+    else:
+        z=df[lz]
+        return df,x,y,z
 
 
 def getMeanCsFromRes(results,m,dim,xlabel='V450-A',ylabel='PE-A',zlabel='FITC-A', errors=False):

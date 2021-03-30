@@ -128,9 +128,13 @@ if __name__=="__main__":
             lz = None
 
 
-        temp,x,y,z = mgm.getCols(dfAuto,lx,ly,lz)
-        mgm.plot3dloglog(x,y,z,name,llim=1,xlabel=lx,ylabel=ly,zlabel=lz,dfAuto=dfAuto)
-        plt.savefig(dirPlots+'3dplot'+name+'h'+sufx+'.png')
+        if not lz == None:
+            temp,x,y,z = mgm.getCols(dfAuto,lx,ly,lz)
+            mgm.plot3dloglog(x,y,z,name,llim=1,xlabel=lx,ylabel=ly,zlabel=lz,dfAuto=dfAuto)
+            plt.savefig(dirPlots+'3dplot'+name+'h'+sufx+'.png')
+        else:
+            temp,x,y = mgm.getCols(dfAuto,lx,ly,lz)
+            mgm.plot2dloglog2(x,y,name,llim=8,lim = 18,xlabel=lx,ylabel=ly,nbins = 100.0,dfAuto=dfAuto)
 
         #names = dataframe.keys()
         #names.sort()
@@ -138,13 +142,18 @@ if __name__=="__main__":
             df = dataframe[name]
             if isinstance(name, int):
                 namestr = str(name)+' h '
-                print(namestr)
-                print('df shape',df.shape)
-                df,x,y,z = mgm.getCols(df,lx,ly,lz)
-                print('df shape',df.shape)
-                mgm.plot3dloglog(x,y,z,namestr,llim=1,
-                        xlabel=lx,ylabel=ly,zlabel=lz,dfAuto=dfAuto)
-                plt.savefig(dirPlots+'3dplot'+str(name)+'h-cor.png')
+                #print(namestr)
+                #print('df shape',df.shape)
+                if not lz == None:
+                    df,x,y,z = mgm.getCols(df,lx,ly,lz)
+                    #print('df shape',df.shape)
+                    mgm.plot3dloglog(x,y,z,namestr,llim=1,
+                                    xlabel=lx,ylabel=ly,zlabel=lz,dfAuto=dfAuto)
+                    plt.savefig(dirPlots+'3dplot'+str(name)+'h-cor.png')
+                else:
+                    df,x,y = mgm.getCols(df,lx,ly,lz)
+                    mgm.plot2dloglog2(x,y,namestr,llim=1,lim = 18,xlabel=lx,ylabel=ly,nbins = 100.0,dfAuto=dfAuto)
+                    plt.savefig(dirPlots+'2dplot'+str(name)+'h-cor.png')
         plt.show()
     else:
         aqName = mgm.getAq(datafile)
