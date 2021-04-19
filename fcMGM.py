@@ -872,7 +872,7 @@ def doPreproc(datafile,sufx,aqName2,path,xlabel,ylabel,zlabel):
         
         fig.savefig(path+'SSCAFSCAPlot-'+str(k)+'h.pdf')
         graph.savefig(path+'Plot-'+str(k)+'h.pdf')
-        dfTh.to_pickle(path+'cleaned'+str(k)+'h.pkl')
+        dfTh.to_pickle(path+'cleaned'+str(k)+'h.pkl',protocol=3)
 
         dataframe[k] = dfTh
                
