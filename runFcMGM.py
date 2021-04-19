@@ -71,6 +71,10 @@ if __name__=="__main__":
         xlab = 'PE-A'
         ylab = 'APC-A'
         zlab = None
+    if ('CTY' in args.i) and ('PKHFitc' in args.i):#args.i == 'dataPKH-CTV.dat':
+        xlab = 'PE-A'
+        ylab = 'FITC-A'
+        zlab = None
     print('xlab',xlab,'ylab',ylab,'zlab',zlab)
 
     datadir = ''
@@ -119,13 +123,14 @@ if __name__=="__main__":
 
         name = 'AutoFl'
         dfAuto = dataframe[name]
-        lx = 'log V450-A'
-        ly = 'log PE-A'
-        lz ='log FITC-A'
-        if ('CTY' in args.i) and ('MITOFR' in args.i):#args.i == 'dataPKH-CTV.dat':
-            lx = 'log PE-A'
-            ly = 'log APC-A'
-            lz = None
+        lx = 'log '+xlab# V450-A'
+        ly = 'log '+ylab#PE-A'
+        if not zlab == None: lz ='log '+zlab
+        else: lz = None
+        #if ('CTY' in args.i) and ('MITOFR' in args.i):#args.i == 'dataPKH-CTV.dat':
+        #    lx = 'log PE-A'
+        #    ly = 'log APC-A'
+        #    lz = None
 
 
         if not lz == None:
