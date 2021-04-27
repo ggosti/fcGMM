@@ -75,6 +75,10 @@ if __name__=="__main__":
         xlab = 'PE-A'
         ylab = 'FITC-A'
         zlab = None
+    if ('CTFR' in args.i) and ('PKHFitc' in args.i):#args.i == 'dataPKH-CTV.dat':
+        xlab = 'APC-A'
+        ylab = 'FITC-A'
+        zlab = None
     print('xlab',xlab,'ylab',ylab,'zlab',zlab)
 
     datadir = ''
