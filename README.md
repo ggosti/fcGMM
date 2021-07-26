@@ -1,4 +1,4 @@
-# fcMGM
+# fcGMM
 
 ![plot](./mixGaussResult.png)
 
