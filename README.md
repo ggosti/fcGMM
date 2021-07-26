@@ -19,7 +19,7 @@ The name of the file may be something like `fileCTV-PKH.dat`, where `CTV` and `P
 
 At the first execution we will run the program with the preprocessing flag:
 ```
-python runFcMGM.py --preprocessing --dim 2 -i PKH-CTV
+python runFcGMM.py --preprocessing --dim 2 -i PKH-CTV
 ```
 The `--dim` flag sets the number of dimensions that are taken in consideration in the Gaussian MIxture Model which can be from 1 to 3.
 The `--preprocessing` flag allows to set the threshold for forward scattering (FSC-A) and
@@ -29,7 +29,7 @@ side scattering (SSCA). It also allows to threshold outliers using the estimate 
 
 Then to set the inital values of the Gaussian Mixture Model we run:
 ```
-python runFcMGM.py --setInit --dim 2 -i PKH-CTV
+python runFcGMM.py --setInit --dim 2 -i PKH-CTV
 
 ```
 ![plot](./initVals.png)
@@ -38,6 +38,6 @@ As it is know the Gaussian Mixture Model relies heavily on the initial condition
 
 Finally, to run the EM Gaussian Mixture Model we run:
 ```
-python runFcMGM.py --dim 2 -i PKH-CTV
+python runFcGMM.py --dim 2 -i PKH-CTV
 ```
 
