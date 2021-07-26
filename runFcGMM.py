@@ -7,7 +7,7 @@ import numpy as np
 
 #from matplotlib.colors import LogNorm
 #from skimage.morphology import square
-import fcMGM as mgm
+import fcGMM as gmm
 #from pandas.plotting import scatter_matrix
 #import scipy.stats as st
 #from skimage.morphology import square
@@ -113,7 +113,7 @@ if __name__=="__main__":
     # names.append('AutoFl')
 
     if args.times == [-1, -2, -3]:
-        names = mgm.getAq(datafile)
+        names = gmm.getAq(datafile)
     else:
         #print('times',args.times)
         names = args.times
@@ -123,7 +123,7 @@ if __name__=="__main__":
 
     if args.preprocessing:
         print('-------------------run preprocessing-------------------------')
-        dataframe = mgm.doPreproc(datafile, sufx, names, dirClean,xlab,ylab,zlab)
+        dataframe = gmm.doPreproc(datafile, sufx, names, dirClean,xlab,ylab,zlab)
 
         name = 'AutoFl'
         dfAuto = dataframe[name]
@@ -138,12 +138,12 @@ if __name__=="__main__":
 
 
         if not lz == None:
-            temp,x,y,z = mgm.getCols(dfAuto,lx,ly,lz)
-            mgm.plot3dloglog(x,y,z,name,llim=1,xlabel=lx,ylabel=ly,zlabel=lz,dfAuto=dfAuto)
+            temp,x,y,z = gmm.getCols(dfAuto,lx,ly,lz)
+            gmm.plot3dloglog(x,y,z,name,llim=1,xlabel=lx,ylabel=ly,zlabel=lz,dfAuto=dfAuto)
             plt.savefig(dirPlots+'3dplot'+name+'h'+sufx+'.png')
         else:
-            temp,x,y = mgm.getCols(dfAuto,lx,ly,lz)
-            mgm.plot2dloglog2(x,y,name,llim=8,lim = 18,xlabel=lx,ylabel=ly,nbins = 100.0,dfAuto=dfAuto)
+            temp,x,y = gmm.getCols(dfAuto,lx,ly,lz)
+            gmm.plot2dloglog2(x,y,name,llim=8,lim = 18,xlabel=lx,ylabel=ly,nbins = 100.0,dfAuto=dfAuto)
 
         #names = dataframe.keys()
         #names.sort()
@@ -154,19 +154,19 @@ if __name__=="__main__":
                 #print(namestr)
                 #print('df shape',df.shape)
                 if not lz == None:
-                    df,x,y,z = mgm.getCols(df,lx,ly,lz)
+                    df,x,y,z = gmm.getCols(df,lx,ly,lz)
                     #print('df shape',df.shape)
-                    mgm.plot3dloglog(x,y,z,namestr,llim=1,
+                    gmm.plot3dloglog(x,y,z,namestr,llim=1,
                                     xlabel=lx,ylabel=ly,zlabel=lz,dfAuto=dfAuto)
                     plt.savefig(dirPlots+'3dplot'+str(name)+'h-cor.png')
                 else:
-                    df,x,y = mgm.getCols(df,lx,ly,lz)
-                    mgm.plot2dloglog2(x,y,namestr,llim=1,lim = 18,xlabel=lx,ylabel=ly,nbins = 100.0,dfAuto=dfAuto)
+                    df,x,y = gmm.getCols(df,lx,ly,lz)
+                    gmm.plot2dloglog2(x,y,namestr,llim=1,lim = 18,xlabel=lx,ylabel=ly,nbins = 100.0,dfAuto=dfAuto)
                     plt.savefig(dirPlots+'2dplot'+str(name)+'h-cor.png')
         plt.show()
     else:
-        aqName = mgm.getAq(datafile)
-        dataPars = mgm.readPreProcPars(aqName)#,path=dirClean)
+        aqName = gmm.getAq(datafile)
+        dataPars = gmm.readPreProcPars(aqName)#,path=dirClean)
         dataframe = {}
         for k in aqName:
             df = pd.read_pickle(dirClean+'cleaned'+str(k)+'h.pkl')
@@ -177,7 +177,7 @@ if __name__=="__main__":
         print('-------------------set init values-------------------------')
         names = []
         if args.times == [-1, -2, -3]:
-            names = mgm.getAq(datafile)
+            names = gmm.getAq(datafile)
         else:
             names = args.times
             names.sort()
@@ -190,7 +190,7 @@ if __name__=="__main__":
                 dim = 2
                 x = data.loc[:,'log '+xlab]#V450-A']
                 y = data.loc[:, 'log '+ylab]
-                xx, yy,f,kernel = mgm.getKernel(x,y)
+                xx, yy,f,kernel = gmm.getKernel(x,y)
                 xy = np.vstack([x,y])
                 valK = kernel(xy)
                 print('hour ',hour,' dim ',dim)
@@ -199,7 +199,7 @@ if __name__=="__main__":
                 if os.path.isfile(initFN):
                     res0 = pd.read_csv(initFN)
                     m = np.sum(['mean' in r for r in res0.columns])
-                    means , Cs = mgm.getMeanCsFromRes(res0,m,dim,
+                    means , Cs = gmm.getMeanCsFromRes(res0,m,dim,
                                                         xlabel=xlab,ylabel=ylab,zlabel=zlab)
                     print(means , Cs)
                     sig = 0.04
@@ -213,10 +213,10 @@ if __name__=="__main__":
                 ax.scatter(x,y,1,c = valK)
                 #print('means',means)
                 #for i,m,c in zip(range(len(means)),means,Cs):
-                    # lam,v = mgm.drawCovEllipse(m,c,ax,i)
+                    # lam,v = gmm.drawCovEllipse(m,c,ax,i)
                 title = 'Timepoint Hour '+str(hour)+'. Set single gaussain centroid'
-                mgm.regenax(x,y,valK,means,Cs,ax,title,xlab,ylab)
-                #mgm.regenax(x,y,valK,m,mean,sig,ax)
+                gmm.regenax(x,y,valK,means,Cs,ax,title,xlab,ylab)
+                #gmm.regenax(x,y,valK,m,mean,sig,ax)
                 #m = input("Enter number of Goussians: ") 
                 #plt.show()
 
@@ -226,7 +226,7 @@ if __name__=="__main__":
                     print('x = %d, y = %d'%(ix, iy) )
                     means.append(np.array([ix, iy]))
                     Cs.append(np.array([[sig, 0],[0,sig]]))
-                    mgm.regenax(x,y,valK,means,Cs,ax,title,xlab,ylab)
+                    gmm.regenax(x,y,valK,means,Cs,ax,title,xlab,ylab)
                     fig.canvas.draw_idle()
                     #fig.canvas.mpl_disconnect(cid)
                     #if len(means) == m:
@@ -246,7 +246,7 @@ if __name__=="__main__":
                 #else:
                 #for C in Cs:
                 #    sigs.append(C)
-                mgm.regenax(x,y,valK,means,Cs,ax,title,xlab,ylab)
+                gmm.regenax(x,y,valK,means,Cs,ax,title,xlab,ylab)
 
                 gauss = 0
                 axM = plt.axes([0.25, 0.25, 0.65, 0.03])#, facecolor=axcolor)
@@ -275,7 +275,7 @@ if __name__=="__main__":
                     sigy = sSigy.val
                     Cs[gauss] = np.array([[sigx,0],[0,sigy]])
                     print('Cs',Cs)
-                    mgm.regenax(x,y,valK,means,Cs,ax,title,xlab,ylab)
+                    gmm.regenax(x,y,valK,means,Cs,ax,title,xlab,ylab)
                     fig.canvas.draw_idle()
                 #sM.on_changed(update)
                 sMx.on_changed(update)
@@ -300,7 +300,7 @@ if __name__=="__main__":
                     sSigy.set_val(sigy)
                     fig.canvas.draw_idle()
                     print(gauss)
-                #    mgm.regenax(x,y,valK,means,sig,ax)
+                #    gmm.regenax(x,y,valK,means,sig,ax)
                 #    fig.canvas.draw_idle()
                 radioM.on_clicked(mfunc)
                 
@@ -311,16 +311,16 @@ if __name__=="__main__":
                 #    C = np.diagflat(s)
                 #    Cs.append(C)
                 print('xlab',xlab)
-                mgm.writeGaussians(hour,dim,m,means,Cs,
+                gmm.writeGaussians(hour,dim,m,means,Cs,
                                    dirInit+'init',sufx,
                                     xlabel=xlab,ylabel=ylab,zlabel=zlab)
 
 
-    print('-------------------run mixture of gaussian-------------------------')
+    print('-------------------run gaussian mixture -------------------------')
 
     names = []
     if args.times == [-1, -2, -3]:
-        names = mgm.getAq(datafile)
+        names = gmm.getAq(datafile)
     else:
         names = args.times
         names.sort()
@@ -335,7 +335,7 @@ if __name__=="__main__":
 
             res0 = pd.read_csv(dirInit+'init-dim'+str(dim)+'-'+str(hour)+'h-'+sufx+'.csv')
             m = np.sum(['mean' in r for r in res0.columns])
-            means,Cs,ws = mgm.runGM(hour,dim,m,data,res0,sufx,outf=True,show=False,cond=False,
+            means,Cs,ws = gmm.runGM(hour,dim,m,data,res0,sufx,outf=True,show=False,cond=False,
             							xlabel=xlab,ylabel=ylab,zlabel=zlab)
             plt.show()
             for k in range(m):
