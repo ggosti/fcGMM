@@ -407,6 +407,22 @@ def plotScatter2dloglog(axScatter,x,y,llim,lim,maskVal=0, nbins = 100.0):
     axScatter.plot([llim, lim],[llim, lim])
     return H    
 
+
+def plot1dlog(x,time,llim=8,lim = 18,xlabel='x',nbins = 100.0,dfAuto=None):
+    # Plot data
+    fig,axHistx= plt.subplots(1,figsize=(12, 12))
+    if isinstance(time, int):
+        axHistx.set_title(str(time)+' h '+ str(len(x)) +' events')
+    else:
+        axHistx.set_title(time+ str(len(x)) +' events')
+    binwidth = (lim-llim)/nbins
+    bins = np.arange(llim, lim + binwidth, binwidth)
+    axHistx.hist(x,range=(llim,lim), bins=bins)
+    axHistx.set_ylabel(xlabel)
+    if isinstance(dfAuto, pd.DataFrame):
+        axHistx.hist(dfAuto[xlabel],range=(llim,lim),bins=bins,histtype='step')
+    return axHistx
+
 def plot2dloglog2(x,y,time,llim=8,lim = 18,xlabel='x',ylabel='y',nbins = 100.0,dfAuto=None):
     # Plot data
     fig = plt.figure(figsize=(12, 12))
@@ -563,21 +579,28 @@ def prepData(x,y,z,ssca,fsca,gate1,gate2,gate3,name,xlabel,ylabel,zlabel):
                            'log '+zlabel:np.log2(z),'ssca':ssca,'fsca':fsca,'gate':gateN})
         g = sns.PairGrid(df, vars= ['log '+xlabel,'log '+ylabel,'log '+zlabel,'ssca','fsca'],
                                              diag_sharey=False,height=1.5, hue="gate")
-    else:
+    elif not ylabel == None:
         df = pd.DataFrame({'log '+xlabel:np.log2(x),'log '+ylabel:np.log2(y),
                            'ssca':ssca,'fsca':fsca,'gate':gateN})
         g = sns.PairGrid(df, vars= ['log '+xlabel,'log '+ylabel,'ssca','fsca'],
+                                             diag_sharey=False,height=1.5, hue="gate")    
+    else:
+        df = pd.DataFrame({'log '+xlabel:np.log2(x),#'log '+ylabel:np.log2(y),
+                           'ssca':ssca,'fsca':fsca,'gate':gateN})
+        g = sns.PairGrid(df, vars= ['log '+xlabel,'ssca','fsca'],
                                              diag_sharey=False,height=1.5, hue="gate")
     #g.map_lower(pairgrid_heatmap)
     g.map_lower(plt.scatter, s = 2.0, alpha = 0.3)
     g.map_diag(plt.hist, bins=40)
     g = g.add_legend()
     g.axes[0,0].set_title(name)
-    g.axes[0,1].set_ylim([0.1,18]) 
-    g.axes[0,2].set_ylim([0.1,18])
-    g.axes[1,0].set_ylim([0.1,18]) 
-    g.axes[3,0].set_xlim([0.1,18])
-    g.axes[3,1].set_xlim([0.1,18])
+    g.axes[0,0].set_xlim([0.1,18])
+    if not ylabel == None:
+        g.axes[1,0].set_ylim([0.1,18]) 
+        g.axes[0,1].set_ylim([0.1,18]) 
+        g.axes[0,2].set_ylim([0.1,18])
+        g.axes[3,0].set_xlim([0.1,18])
+        g.axes[3,1].set_xlim([0.1,18])
     if not zlabel == None:
         g.axes[2,0].set_ylim([0.1,18])
         g.axes[2,1].set_ylim([0.1,18])
@@ -592,12 +615,15 @@ def prepData(x,y,z,ssca,fsca,gate1,gate2,gate3,name,xlabel,ylabel,zlabel):
 
 def getCols(df,lx,ly,lz):
     x=df[lx]
-    y=df[ly]
-    if lz == None :
-        return df,x,y
+    if (lz == None) and (ly == None):
+        return df,x
     else:
-        z=df[lz]
-        return df,x,y,z
+        y=df[ly]
+        if lz == None :
+            return df,x,y
+        else:
+            z=df[lz]
+            return df,x,y,z
 
 
 def getMeanCsFromRes(results,m,dim,xlabel='V450-A',ylabel='PE-A',zlabel='FITC-A', errors=False):
@@ -760,7 +786,10 @@ def readPreProcPars(aqName):
 
 def removeZeros(data,xlabel,ylabel,zlabel):
     x=data[xlabel]
-    y=data[ylabel]
+    if not ylabel == None:
+    	y=data[ylabel]
+    else:
+        y=np.ones_like(x)
     if not zlabel == None:
         z=data[zlabel]
     else:
@@ -768,7 +797,11 @@ def removeZeros(data,xlabel,ylabel,zlabel):
     gate0 = (x>0)&(y>0)&(z>0)
     data = data[gate0]
     x=data[xlabel]
-    y=data[ylabel]
+    if not ylabel == None:
+        y=data[ylabel]
+    else:
+        y=np.ones_like(x)
+        y[:]=np.nan
     if not zlabel == None:
         z=data[zlabel]
     else:
@@ -804,10 +837,12 @@ def doPreproc(datafile,sufx,aqName2,path,xlabel,ylabel,zlabel):
         xy = np.vstack([fsca,ssca])
         valK = kernel(xy)
         ax.scatter(fsca,ssca)
+        ax.set_xlabel('fsca')
+        ax.set_ylabel('ssca')
         ax.scatter(fsca[valK>th],ssca[valK>th],c=valK[valK>th])
         ax.scatter(fsca[gate1],ssca[gate1],c='red')
         ax.scatter(fsca[gate2],ssca[gate2],c='yellow')
-        ax.set_title('Timepoint '+str(k)+' h '+meta['EXPORT TIME'][:6]+' '+meta['$ETIM'])
+        ax.set_title(str(k)+' h '+meta['EXPORT TIME'][:6]+' '+meta['$ETIM']+' th :'+str(th))
         dataPars[k]['date'] = meta['EXPORT TIME'][:6]
         dataPars[k]['time'] = meta['$ETIM']
 
@@ -833,6 +868,8 @@ def doPreproc(datafile,sufx,aqName2,path,xlabel,ylabel,zlabel):
             #print v
             ax.clear()
             ax.scatter(fsca,ssca)
+            ax.set_xlabel('fsca')
+            ax.set_ylabel('ssca')
             ax.scatter(fsca[valK>th],ssca[valK>th],10.,c=valK[valK>th])
             ax.scatter(fsca[gate1],ssca[gate1],10.,c='red')
             ax.scatter(fsca[gate2],ssca[gate2],10.,c='yellow')

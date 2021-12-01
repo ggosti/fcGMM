@@ -58,15 +58,17 @@ if __name__=="__main__":
     print('i',args.i)
     ylab = None
     if ('PKH' in args.i) and (not 'MITO' in args.i):#args.i == 'dataPKH-CTV.dat':
+        xlab = 'V450-A'
         ylab = 'PE-A'
         zlab = None
     if (not 'PKH' in args.i) and ('MITO' in args.i):#args.i == 'dataMITO-CTV.dat':
+        xlab = 'V450-A'
         ylab = 'FITC-A'
         zlab = None
-    if ('PKH' in args.i) and ('MITO' in args.i): #args.i == 'dataPKH-CTV-MITO.dat':
+    if ('CTV' in args.i) and ('PKH' in args.i) and ('MITO' in args.i): #args.i == 'dataPKH-CTV-MITO.dat':
+        xlab = 'V450-A'
         ylab = 'PE-A'
         zlab = 'FITC-A'
-    xlab = 'V450-A'
     if ('CTY' in args.i) and ('MITOFR' in args.i):#args.i == 'dataPKH-CTV.dat':
         xlab = 'PE-A'
         ylab = 'APC-A'
@@ -79,6 +81,10 @@ if __name__=="__main__":
         xlab = 'APC-A'
         ylab = 'FITC-A'
         zlab = None
+    if ('CTV' in args.i) and (int(args.dim) == 1):
+        xlab = 'V450-A'
+        ylab = None
+        zlab = None    
     print('xlab',xlab,'ylab',ylab,'zlab',zlab)
 
     datadir = ''
@@ -128,23 +134,27 @@ if __name__=="__main__":
         name = 'AutoFl'
         dfAuto = dataframe[name]
         lx = 'log '+xlab# V450-A'
-        ly = 'log '+ylab#PE-A'
+        if not ylab == None: ly = 'log '+ylab#PE-A'
+        else: ly = None
         if not zlab == None: lz ='log '+zlab
         else: lz = None
         #if ('CTY' in args.i) and ('MITOFR' in args.i):#args.i == 'dataPKH-CTV.dat':
         #    lx = 'log PE-A'
         #    ly = 'log APC-A'
         #    lz = None
-
-
+        
+        
         if not lz == None:
             temp,x,y,z = gmm.getCols(dfAuto,lx,ly,lz)
             gmm.plot3dloglog(x,y,z,name,llim=1,xlabel=lx,ylabel=ly,zlabel=lz,dfAuto=dfAuto)
             plt.savefig(dirPlots+'3dplot'+name+'h'+sufx+'.png')
-        else:
+        elif not ly == None:
             temp,x,y = gmm.getCols(dfAuto,lx,ly,lz)
-            gmm.plot2dloglog2(x,y,name,llim=8,lim = 18,xlabel=lx,ylabel=ly,nbins = 100.0,dfAuto=dfAuto)
-
+            gmm.plot2dloglog2(x,y,name,llim=1,lim = 18,xlabel=lx,ylabel=ly,nbins = 100.0,dfAuto=dfAuto)  
+        else:
+            temp,x = gmm.getCols(dfAuto,lx,ly,lz)
+            gmm.plot1dlog(x,name,llim=1,lim = 18,xlabel=lx,nbins = 100.0,dfAuto=dfAuto)
+        
         #names = dataframe.keys()
         #names.sort()
         for name in names: 
@@ -159,10 +169,14 @@ if __name__=="__main__":
                     gmm.plot3dloglog(x,y,z,namestr,llim=1,
                                     xlabel=lx,ylabel=ly,zlabel=lz,dfAuto=dfAuto)
                     plt.savefig(dirPlots+'3dplot'+str(name)+'h-cor.png')
-                else:
+                elif not ly == None:
                     df,x,y = gmm.getCols(df,lx,ly,lz)
                     gmm.plot2dloglog2(x,y,namestr,llim=1,lim = 18,xlabel=lx,ylabel=ly,nbins = 100.0,dfAuto=dfAuto)
                     plt.savefig(dirPlots+'2dplot'+str(name)+'h-cor.png')
+                else:
+                    df,x = gmm.getCols(df,lx,ly,lz)
+                    gmm.plot1dlog(x,namestr,llim=1,lim = 18,xlabel=lx,nbins = 100.0,dfAuto=dfAuto)
+                    plt.savefig(dirPlots+'1dplot'+str(name)+'h-cor.png')
         plt.show()
     else:
         aqName = gmm.getAq(datafile)
