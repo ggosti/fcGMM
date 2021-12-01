@@ -662,15 +662,18 @@ def getMeanCsFromRes(results,m,dim,xlabel='V450-A',ylabel='PE-A',zlabel='FITC-A'
 def runGM(hour,dim,m,data,res0,sufx,outf=True,show=True,cond=False,xlabel='V450-A',ylabel='PE-A',zlabel='FITC-A'):
     #print(data.columns)
     x = data['log '+xlabel]
-    y = data['log '+ylabel]
+    if not ylabel == None:
+    	y = data['log '+ylabel]
     if not zlabel == None:
         z = data['log '+zlabel]
 
     if show:
         if not zlabel == None:
-            plot3dloglog(x,y,z,hour,llim=2,xlabel=xlabel,ylabel=ylabel,zlabel=zlabel)
+            plot3dloglog(x,y,z,hour,llim=1,xlabel=xlabel,ylabel=ylabel,zlabel=zlabel)
+        elif not ylabel == None:
+            plot2dloglog2(x, y, hour, llim=1, lim=18, xlabel=xlabel, ylabel=ylabel)
         else:
-            plot2dloglog2(x, y, hour, llim=2, lim=18, xlabel=xlabel, ylabel=ylabel)
+            plot1dlog(x,name,llim=1,lim = 18,xlabel=lx,nbins = 100.0,dfAuto=dfAuto)
 
 
     if dim == 1: samples = x.values
