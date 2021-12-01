@@ -9,7 +9,7 @@ import fcsparser
 from matplotlib import pyplot
 from mpl_toolkits.mplot3d import Axes3D
 
-from scipy.stats import muMltivariate_normal
+from scipy.stats import multivariate_normal
 from scipy.stats import chi
 from scipy.spatial import distance
 
