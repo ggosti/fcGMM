@@ -912,6 +912,28 @@ def doPreproc(datafile,sufx,aqName2,path,xlabel,ylabel,zlabel):
         
         fig.savefig(path+'SSCAFSCAPlot-'+str(k)+'h.pdf')
         graph.savefig(path+'Plot-'+str(k)+'h.pdf')
+        date_time_str = meta['$DATE'] +' '+  meta['$BTIM']
+        dateTime1 = datetime.datetime.strptime(date_time_str, '%d-%b-%Y %H:%M:%S')
+        date_time_str = meta['$DATE'] +' '+  meta['$ETIM']
+        dateTime2 = datetime.datetime.strptime(date_time_str, '%d-%b-%Y %H:%M:%S')
+        #print(dateTime1)
+        dateTimeDifference = dateTime1 - dateTime0
+        execDateTimeDifference = dateTime2 - dateTime1
+        # Divide difference in seconds by number of seconds in hour (3600)  
+        dateTimeDifferenceInHours = dateTimeDifference.total_seconds() / 3600 
+        dateTimeDifferenceInMins = dateTimeDifference.total_seconds() / 60
+        execDateTimeDifferenceInMins = dateTimeDifference.total_seconds() / 60
+        dfTh['preprocessing drop rate']= float(len(dfTh))/float(len(data))
+        dfTh['probability kernel th'] = th
+        dfTh['ssca hf'] = sthssca.val
+        dfTh['fsca hf'] = sthfsca.val
+        dfTh['EXPORT TIME'] = meta['EXPORT TIME']
+        dfTh['$DATE'] = meta['DATE']
+        dfTh['$BTIM'] = meta['BTIM']
+        dfTh['$ETIM'] = meta['ETIM']
+        dfTh['filename hour']=k
+        dfTh['time from t0 (mins)']= minsFromT0
+        dfTh['sorting elapsed time']=minsSortingTime
         dfTh.to_pickle(path+'cleaned'+str(k)+'h.pkl',protocol=3)
 
         dataframe[k] = dfTh
