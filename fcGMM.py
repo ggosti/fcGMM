@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import csv
 import fcsparser
+import datetime
+import locale
 
 from matplotlib import pyplot
 from mpl_toolkits.mplot3d import Axes3D
@@ -780,8 +782,9 @@ def readPreProcPars(aqName):
             dataPars[a] = d
     for a in aqName:
         try:
-            print(dataPars[a])
+            print('loaded pars.',dataPars[a]['aq. name'])
         except:
+            print('new pars.',a)
             d = {'aq. name': a,'th':10**-11,'fsca lf':10000,'fsca hf':250000,'ssca lf':10000,'ssca hf':250000}
             dataPars[a] = d
             #print('new ', dataPars[a])
@@ -812,10 +815,25 @@ def removeZeros(data,xlabel,ylabel,zlabel):
         z[:]=np.nan
     return x,y,z,data
 
+def writeDataPar(k,dataPars,meta,dRate,th,sthsscaVal,sthfscaVal):
+    dataPars[k]['date'] = meta['EXPORT TIME'][:6]
+    dataPars[k]['time'] = meta['$ETIM']           
+    dataPars[k]['preprocessing drop rate'] = "{:.3f}".format(dRate)
+    dataPars[k]['th'] = th
+    dataPars[k]['ssca hf'] = sthsscaVal
+    dataPars[k]['fsca hf'] = sthfscaVal
+    return dataPars
+
 def doPreproc(datafile,sufx,aqName2,path,xlabel,ylabel,zlabel):
     dataframe = {}
     aqName = getAq(datafile)
     dataPars = readPreProcPars(aqName)
+    
+    meta, data = fcsparser.parse(datafile[0], meta_data_only=False, reformat_meta=True)
+    date_time_str = meta['$DATE'] +' '+  meta['$BTIM']
+    print(date_time_str)
+    dateTime0 = datetime.datetime.strptime(date_time_str, '%d-%b-%Y %H:%M:%S')
+    print(dateTime0)
 
     for k in aqName2:
         f = datafile[k]
@@ -826,8 +844,9 @@ def doPreproc(datafile,sufx,aqName2,path,xlabel,ylabel,zlabel):
         ssca = data['SSC-A']
         fsca = data['FSC-A']
         vs,vf = dataPars[k]['ssca hf'],dataPars[k]['fsca hf']
-        gate1 = (fsca<dataPars[k]['fsca lf'])|(fsca>vf)
-        gate2 = (ssca<dataPars[k]['ssca lf'])|(ssca>vs)
+        lfs,lff = dataPars[k]['ssca lf'],dataPars[k]['fsca lf']
+        gate1 = (fsca<lff)|(fsca>vf)
+        gate2 = (ssca<lfs)|(ssca>vs)
 
         xx, yy,f,kernel =getKernel(fsca,ssca)
         th = dataPars[k]['th']
@@ -846,8 +865,6 @@ def doPreproc(datafile,sufx,aqName2,path,xlabel,ylabel,zlabel):
         ax.scatter(fsca[gate1],ssca[gate1],c='red')
         ax.scatter(fsca[gate2],ssca[gate2],c='yellow')
         ax.set_title(str(k)+' h '+meta['EXPORT TIME'][:6]+' '+meta['$ETIM']+' th :'+str(th))
-        dataPars[k]['date'] = meta['EXPORT TIME'][:6]
-        dataPars[k]['time'] = meta['$ETIM']
 
         axcolor = 'lightgoldenrodyellow'
         axTh = plt.axes([0.15, 0.05, 0.65, 0.03], facecolor=axcolor)
@@ -865,8 +882,8 @@ def doPreproc(datafile,sufx,aqName2,path,xlabel,ylabel,zlabel):
             vs = sthssca.val
             vf = sthfsca.val
             th = (10**(-v))
-            gate1 = (fsca<dataPars[k]['fsca lf'])|(fsca>vf)
-            gate2 = (ssca<dataPars[k]['ssca lf'])|(ssca>vs)
+            gate1 = (fsca<lff)|(fsca>vf)
+            gate2 = (ssca<lfs)|(ssca>vs)
             #print 'th',th
             #print v
             ax.clear()
@@ -888,11 +905,9 @@ def doPreproc(datafile,sufx,aqName2,path,xlabel,ylabel,zlabel):
             th = (10**(-v))
             gateTh = valK<th
             graph,dfTh = prepData(x,y,z,ssca,fsca,gateTh,gate1,gate2,str(k)+'h',xlabel,ylabel,zlabel)
-            print('drop rate ',float(len(dfTh))/float(len(data)),' original sample size ',len(data), ' th. sample size ',len(dfTh))
-            dataPars[k]['preprocessing drop rate'] = float(len(dfTh))/float(len(data))
-            dataPars[k]['th'] = th
-            dataPars[k]['ssca hf'] = sthssca.val
-            dataPars[k]['fsca hf'] = sthfsca.val
+            dRate = float(len(dfTh))/float(len(data))
+            print('drop rate ',dRate,' original sample size ',len(data), ' th. sample size ',len(dfTh))
+            #dataPars =writeDataPar(k,dataPars,meta,dRate,th,sthssca.val,sthfsca.val)
             plt.show()
             
         axUpdate = plt.axes([0.81, 0.20, 0.1, 0.075])
@@ -902,40 +917,70 @@ def doPreproc(datafile,sufx,aqName2,path,xlabel,ylabel,zlabel):
         gateTh = valK<th
         graph,dfTh = prepData(x,y,z,ssca,fsca,gateTh,
                                gate1,gate2,str(k)+' h',xlabel,ylabel,zlabel)
-        dataPars[k]['preprocessing drop rate'] = float(len(dfTh))/float(len(data))
-        dataPars[k]['th'] = th
-        dataPars[k]['ssca hf'] = sthssca.val
-        dataPars[k]['fsca hf'] = sthfsca.val
-        print('drop rate ',float(len(dfTh))/float(len(data)),' original sample size ',len(data), ' th. sample size ',len(dfTh))
+        dRate = float(len(dfTh))/float(len(data))
+        print('drop rate ',dRate,' original sample size ',len(data), ' th. sample size ',len(dfTh))
+        dataPars = writeDataPar(k,dataPars,meta,dRate,th,sthssca.val,sthfsca.val)
             
         plt.show()
         
+        v = sth.val
+        th = (10**(-v))
+        vs = sthssca.val
+        vf = sthfsca.val
+        gateTh = valK>=th
+        gate1 = (fsca>=lff)&(fsca<=vf)
+        gate2 = (ssca>=lfs)&(ssca<=vs)
+        dfTh = data[gate1&gate2&gateTh]
+        dfTh.insert(0, 'log '+xlabel,np.log2(x))
+        if not ylabel == None: dfTh.insert(0, 'log '+ylabel,np.log2(y))
+        if not zlabel == None: dfTh.insert(0, 'log '+zlabel,np.log2(z))
+        dRate = float(len(dfTh))/float(len(data))
+        #print('drop rate ',dRate,' original sample size ',len(data), ' th. sample size ',len(dfTh))
+        dataPars = writeDataPar(k,dataPars,meta,dRate,th,vs,vf)
+        #print(dataPars)
+
+        
         fig.savefig(path+'SSCAFSCAPlot-'+str(k)+'h.pdf')
         graph.savefig(path+'Plot-'+str(k)+'h.pdf')
-        date_time_str = meta['$DATE'] +' '+  meta['$BTIM']
-        dateTime1 = datetime.datetime.strptime(date_time_str, '%d-%b-%Y %H:%M:%S')
-        date_time_str = meta['$DATE'] +' '+  meta['$ETIM']
-        dateTime2 = datetime.datetime.strptime(date_time_str, '%d-%b-%Y %H:%M:%S')
-        #print(dateTime1)
+        #print('start to save pars')
+        dfTh.insert(0, 'preprocessing drop rate', dRate)
+        dfTh.insert(0, 'probability kernel th', th)
+        dfTh.insert(0, 'ssca hf', vs)
+        dfTh.insert(0, 'fsca hf', vf)
+        dfTh.insert(0, 'EXPORT TIME', meta['EXPORT TIME'])
+        dfTh.insert(0, '$DATE', meta['$DATE'])
+        dfTh.insert(0, '$BTIM', meta['$BTIM'])
+        dfTh.insert(0, '$ETIM', meta['$ETIM'])
+        dfTh.insert(0, 'filename hour', k)
+        try:
+            date_time_str = meta['$DATE'] +' '+  meta['$BTIM']
+            dateTime1 = datetime.datetime.strptime(date_time_str, '%d-%b-%Y %H:%M:%S')
+            date_time_str = meta['$DATE'] +' '+  meta['$ETIM']
+            dateTime2 = datetime.datetime.strptime(date_time_str, '%d-%b-%Y %H:%M:%S')
+        except ValueError:
+            locale.setlocale(locale.LC_TIME, "en_US.utf8")
+            date_time_str1 = meta['$DATE'] +' '+  meta['$BTIM']
+            #print('ValueError: date and btime: ',date_time_str1)
+            #date_time_str1 = input('type date and btime')
+            dateTime1 = datetime.datetime.strptime(date_time_str1, '%d-%b-%Y %H:%M:%S')
+            date_time_str2 = meta['$DATE'] +' '+  meta['$ETIM']
+            #print('ValueError: date and etime',date_time_str2)
+            #date_time_str2 = input('type date and etime: ')
+            dateTime2 = datetime.datetime.strptime(date_time_str2, '%d-%b-%Y %H:%M:%S')
         dateTimeDifference = dateTime1 - dateTime0
         execDateTimeDifference = dateTime2 - dateTime1
-        # Divide difference in seconds by number of seconds in hour (3600)  
-        dateTimeDifferenceInHours = dateTimeDifference.total_seconds() / 3600 
         dateTimeDifferenceInMins = dateTimeDifference.total_seconds() / 60
         execDateTimeDifferenceInMins = dateTimeDifference.total_seconds() / 60
-        dfTh['preprocessing drop rate']= float(len(dfTh))/float(len(data))
-        dfTh['probability kernel th'] = th
-        dfTh['ssca hf'] = sthssca.val
-        dfTh['fsca hf'] = sthfsca.val
-        dfTh['EXPORT TIME'] = meta['EXPORT TIME']
-        dfTh['$DATE'] = meta['DATE']
-        dfTh['$BTIM'] = meta['BTIM']
-        dfTh['$ETIM'] = meta['ETIM']
-        dfTh['filename hour']=k
-        dfTh['time from t0 (mins)']= minsFromT0
-        dfTh['sorting elapsed time']=minsSortingTime
+        dfTh.insert(0, 'time from t0 (mins)', dateTimeDifferenceInMins)#.loc[:,'time from t0 (mins)']= [dateTimeDifferenceInMins]*len(dfTh)
+        dfTh.insert(0, 'sorting elapsed time', execDateTimeDifferenceInMins)#.loc[:,'sorting elapsed time']=[execDateTimeDifferenceInMins]*len(dfTh)
+        #except ValueError:
+        #    date_time_str = meta['$DATE'] +' '+  meta['$BTIM']
+        #    print('ValueError',date_time_str)
+        #    dfTh.insert(0, 'time from t0 (mins)', None)#= [None]*len(dfTh)
+        #    dfTh.insert(0, 'sorting elapsed time', None)# = [execDateTimeDifferenceInMins]*len(dfTh)            
         dfTh.to_pickle(path+'cleaned'+str(k)+'h.pkl',protocol=3)
-
+        dfTh.to_csv(path+'cleaned'+str(k)+'h.csv')
+        #print('saved pars')
         dataframe[k] = dfTh
                
 

@@ -124,7 +124,7 @@ if __name__=="__main__":
         #print('times',args.times)
         names = args.times
         names.sort()
-        names = ['AutoFl']+names
+        #names = ['AutoFl']+names
     #print('-----names-----', names)
 
     if args.preprocessing:
