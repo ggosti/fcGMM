@@ -342,6 +342,7 @@ if __name__=="__main__":
 
     for name in names:
         if isinstance(name, int):
+            print('--name--',name)
             data = dataframe[name]
             hour = name
             dim = int(args.dim)
