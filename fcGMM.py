@@ -952,6 +952,7 @@ def doPreproc(datafile,sufx,aqName2,path,xlabel,ylabel,zlabel):
         dfTh.insert(0, '$BTIM', meta['$BTIM'])
         dfTh.insert(0, '$ETIM', meta['$ETIM'])
         dfTh.insert(0, 'filename hour', k)
+        dfTh.insert(0, 'fcs file path', datafile[k])
         try:
             date_time_str = meta['$DATE'] +' '+  meta['$BTIM']
             dateTime1 = datetime.datetime.strptime(date_time_str, '%d-%b-%Y %H:%M:%S')

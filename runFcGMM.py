@@ -342,11 +342,10 @@ if __name__=="__main__":
 
     for name in names:
         if isinstance(name, int):
-            print('--name--',name)
+            print('---file: ',name,'---')
             data = dataframe[name]
             hour = name
             dim = int(args.dim)
-            print('--name--',name)
             print('dim',dim)
 
             res0 = pd.read_csv(dirInit+'init-dim'+str(dim)+'-'+str(hour)+'h-'+sufx+'.csv')
