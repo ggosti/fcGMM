@@ -40,4 +40,15 @@ Finally, to run the EM Gaussian Mixture Model we run:
 ```
 python runFcGMM.py --dim 2 -i PKH-CTV
 ```
+## Citation
+
+This code was used in the following paper, if you find this project useful, please cite:
+> Giovanna Peruzzi, Mattia Miotto, Roberta Maggio, Giancarlo Ruocco, and Giorgio Gosti.
+> *Asymmetric binomial statistics explains organelle partitioning variance in cancer cell proliferation*.
+> Commun Phys 4, 188 (2021).
+> https://doi.org/10.1038/s42005-021-00690-5
+
+```
+
+```
 
