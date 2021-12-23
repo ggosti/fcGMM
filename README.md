@@ -48,7 +48,4 @@ This code was used in the following paper, if you find this project useful, plea
 > Commun Phys 4, 188 (2021).
 > https://doi.org/10.1038/s42005-021-00690-5
 
-```
-
-```
 
