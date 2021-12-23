@@ -1,4 +1,4 @@
-# fcGMM
+# Gaussian Mixture Modeling for Flow Cytometry Data fcGMM
 
 ![plot](./mixGaussResult.png)
 
