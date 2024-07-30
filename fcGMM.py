@@ -839,6 +839,7 @@ def doPreproc(datafile,sufx,aqName2,path,xlabel,ylabel,zlabel):
         f = datafile[k]
         meta, data = fcsparser.parse(f, meta_data_only=False, reformat_meta=True)
         print('acquisition ',k)
+        print('data keys ',data.keys)
         print(meta['EXPORT TIME'],meta['$ETIM'])
         x,y,z,data = removeZeros(data,xlabel,ylabel,zlabel)
         ssca = data['SSC-A']

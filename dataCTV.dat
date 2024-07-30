@@ -1,0 +1,6 @@
+data/
+AutoFl:CCD 18 Co_CCD18 Co AUTO.fcs
+0:CCD 18 Co_CCD18 Co CTV.fcs
+1:CCD 18 Co_CCD18 Co CTV check purity T0.fcs
+2:CCD 18 Co_CCD18 Co T1 48h well2.fcs
+3:CCD 18 Co_CCD18 Co T2 72h well 1.fcs
