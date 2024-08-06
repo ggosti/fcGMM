@@ -13,10 +13,11 @@ python -m pip install -r requirements.txt
 
 ## Notebook or script mode
 
-This git repository allows either to run a Jupyter notebook 
-or a script. The motebook allows the analysis of a single fcs file the script allows the batch execution on more fcs files.
+This git repository allows either to run a Jupyter notebook
+or a script. The notebook allows the analysis of a single fcs file and provides a simple example of how the code works.
+The script allows the batch execution on more fcs files.
 
-## Notebook mode
+## Notebook example
 
 To run the script run Jupyter and open the `ExampleNotebook.ipynb`
 
