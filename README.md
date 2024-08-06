@@ -1,5 +1,19 @@
 # Gaussian Mixture Modeling for Flow Cytometry Data fcGMM
 
+## Install requirements
+To install requirements, first make virtual enviroment and activate it
+```
+python  -m venv venv
+.\venv\Scripts\activate
+```
+Then, install requirement with pip
+```
+python -m pip install -r requirements.txt
+```
+
+
+## Set up files
+
 ![plot](./mixGaussResult.png)
 
 The program requires the existence of a file descirbing were the cytofluorometer outpufiles are placed. 
