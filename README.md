@@ -11,8 +11,18 @@ Then, install requirement with pip
 python -m pip install -r requirements.txt
 ```
 
+## Notebook or script mode
 
-## Set up files
+This git repository allows either to run a Jupyter notebook 
+or a script. The motebook allows the analysis of a single fcs file the script allows the batch execution on more fcs files.
+
+## Notebook mode
+
+To run the script run Jupyter and open the `ExampleNotebook.ipynb`
+
+## Script mode
+
+### Set up files
 
 ![plot](./mixGaussResult.png)
 
