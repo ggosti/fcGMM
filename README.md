@@ -19,7 +19,7 @@ The script allows the batch execution on more fcs files.
 
 ## Notebook example
 
-To run the script run Jupyter and open the `ExampleNotebook.ipynb`
+To run the notebook run Jupyter and open the `ExampleNotebook.ipynb`
 
 ## Script mode
 
